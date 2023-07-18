@@ -1,0 +1,13 @@
+# dependencies
+/node_modules
+
+# source
+/src
+
+# test
+/__tests__
+
+# misc
+.DS_Store
+tsconfig.json
+.env.*local
