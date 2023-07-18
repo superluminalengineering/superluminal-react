@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "commonjs",
+    "module": "ESNext",
     "target": "es5",
     "lib": ["dom", "es2015"],
     "jsx": "react",
-    "declaration": true
+    "typeRoots" : ["./node_modules/@types", "./types"],
+    "declaration": true,
+    "esModuleInterop": true
   },
-  "include": ["./src"],
+  "include": ["./src", "./types" ],
   "exclude": ["node_modules"]
 }
