@@ -7,6 +7,7 @@ import ProfilePictureView from './components/ProfilePictureView';
 import { ChatEditorVM } from './models/ChatEditorVM';
 
 import LogoInverted from './images/logo_inverted.svg'
+import LogoText from './images/logo_text.svg'
 
 interface Props {
     editor: ChatEditorVM
@@ -83,8 +84,16 @@ class AssistantView extends React.Component<Props, State> { //implements Project
     render() {
         const { style } = this.props;
         return <div style={{ ...styles.assistantView, ...style }}>
+            { this.getWatermarkView() }
             { this.getChatMessagesView() }
             { this.getInputView() }
+        </div>
+    }
+
+    getWatermarkView(): any {
+        return <div style={styles.watermark}>
+            <span style={{ opacity: 0.4 }}>Powered by</span>
+            <img src={LogoText} height="18px" style={{ opacity: 0.4, marginTop: '1px' }} />
         </div>
     }
 
@@ -176,6 +185,22 @@ const styles = {
         border: "solid 1px #0000001A",
     } as React.CSSProperties,
 
+    watermark: {
+        position: 'absolute',
+        width: '100%',
+        height: '32px',
+        top: '0px',
+        left: '0px',
+        borderBottom: 'solid 1px #0000001A',
+        backdropFilter: "blur(12px)",
+        background: "#FFFFFFE6",
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        columnGap: '9px',
+    } as React.CSSProperties,
+
     chatScrollView: {
         display: 'flex',
         flexDirection: 'column',
@@ -188,7 +213,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        padding: '0px 0px 77px 0px',
+        padding: '32px 0px 77px 0px',
         boxSizing: 'border-box',
     } as React.CSSProperties,
 
