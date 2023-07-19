@@ -35,10 +35,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         super(props);
         this.state = { 
             user: null,
-            chatMessages: [
-                { id: '1', sender: 'user', content: { text: 'Filter to 2018 only' } },
-                { id: '2', sender: 'assistant', content: { text: 'Sure!' } }
-            ],
+            chatMessages: [],
             isProcessing: false,
         };
         this.sendMessage = this.sendMessage.bind(this);
@@ -83,55 +80,54 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         const { userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
         const { user, chatMessages } = this.state;
         const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
-        let content: any;
         if (user) {
-            content = <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
-                { chatMessages.map((message) => {
-                    switch (message.sender) {
-                    case 'user':
-                        if ('text' in message.content) {
-                            return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
-                                <ProfilePictureView userName={user.name} style={combinedUserProfilePictureStyle} />
-                                <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
-                            </div>
-                        } else {
-                            return '';
-                        }
-                    case 'assistant':
-                        if ('text' in message.content) {
-                            return <div style={styles.messageContainer}>
-                                <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
-                                <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
-                            </div>
-                        } else {
-                            const plot = JSON.parse(message.content.plot);
-                            // `offsetWidth` should always be set at this point. `320` is an arbitrary reasonable fallback.
-                            // The padding is currently fixed at 20 px on each side.
-                            const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20;
-                            const height = ((plot.layout.width * width) / plot.layout.height);
-                            const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
-                            return <div style={styles.messageContainer}>
-                                <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
-                                <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
-                                    <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
-                                        <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
+            return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
+                <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
+                    <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
+                        { chatMessages.map((message) => {
+                            switch (message.sender) {
+                            case 'user':
+                                if ('text' in message.content) {
+                                    return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
+                                        <ProfilePictureView userName={user.name} style={combinedUserProfilePictureStyle} />
+                                        <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
                                     </div>
-                                </div>
-                            </div>
-                        }
-                    }
-                }) }
+                                } else {
+                                    return '';
+                                }
+                            case 'assistant':
+                                if ('text' in message.content) {
+                                    return <div style={styles.messageContainer}>
+                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                        <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
+                                    </div>
+                                } else {
+                                    const plot = JSON.parse(message.content.plot);
+                                    // `offsetWidth` should always be set at this point. `320` is an arbitrary reasonable fallback.
+                                    // The padding is currently fixed at 20 px on each side.
+                                    const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20;
+                                    const height = ((plot.layout.width * width) / plot.layout.height);
+                                    const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
+                                    return <div style={styles.messageContainer}>
+                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                        <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
+                                            <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
+                                                <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }) }
+                    </div>
+                </div>
             </div>
         } else {
-            content = <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
-                Loading...
+            return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <img src='https://getluminal.com/img/ai.gif' width="80px" height="80px" />
+                <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000' }}>Loading</div>
             </div>
         }
-        return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
-            <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
-                { content }
-            </div>
-        </div>
     }
 
     getInputView(): any {
