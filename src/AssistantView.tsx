@@ -6,13 +6,11 @@ import InlineInput from './components/InlineInput';
 
 import { ChatEditorVM } from './models/ChatEditorVM';
 
-import './AssistantView.css';
-
 import LogoInverted from './images/logo_inverted.svg'
 
 interface Props {
     editor: ChatEditorVM
-    style?: any
+    style?: React.CSSProperties
 }
 
 interface State {
@@ -76,9 +74,9 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         const { style } = this.props;
         const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: 'var(--black5)', boxSizing: 'border-box',
             width: '100%', borderRadius: '6px', background: 'var(--black2)', height: '38px', opacity: this.isProcessing() ? 0.5 : 1 };
-        return <div className="assistant-view" style={{ ...style }}>
+        return <div className="assistant-view" style={{ ...styles.assistantView, ...style }}>
             { this.getChatView() }
-            <div ref={this.inputBoxRef} className="assistant-view-input-box">
+            <div ref={this.inputBoxRef} className="assistant-view-input-box" style={styles.inputBox}>
                 <InlineInput ref={this.inputRef} placeholder="Type here..." style={inlineInputStyle} onFocusChanged={this.onInputFocusChanged} onEnter={this.execute} />
                 <div className="prominent-button" style={{ width: '96px', height: '35px', opacity: this.isProcessing() ? 0.5 : 1 }} onClick={this.execute}>Send</div>
             </div>
@@ -87,24 +85,24 @@ class AssistantView extends React.Component<Props, State> { //implements Project
 
     getChatView(): any {
         const { editor } = this.state;
-        return <div ref={this.scrollViewRef} className="assistant-view-chat-view-container">
-            <div className="assistant-view-chat-view">
+        return <div ref={this.scrollViewRef} className="assistant-view-chat-view-container" style={styles.chatViewContainer}>
+            <div className="assistant-view-chat-view" style={styles.chatView}>
                 { editor.messages.map((message) => {
                     switch (message.sender) {
                     case 'user':
                         if ('text' in message.content) {
-                            return <div className="assistant-view-message-container" style={{ background: '#00000004' }}>
+                            return <div className="assistant-view-message-container" style={{ ...styles.messageContainer, background: '#00000004' }}>
                                 {/* <ProfilePictureView name={user.name ?? ''} style={{ width: '24px', height: '24px', fontSize: '10px' }} /> */}
-                                <div className="assistant-view-user-message">{message.content.text}</div>
+                                <div className="assistant-view-user-message" style={styles.userMessage}>{message.content.text}</div>
                             </div>
                         } else {
                             return '';
                         }
                     case 'assistant':
                         if ('text' in message.content) {
-                            return <div className="assistant-view-message-container">
-                                <img src={LogoInverted} className="ai-profile-picture-view" width="24px" height="24px" />
-                                <div className="assistant-view-system-message">
+                            return <div className="assistant-view-message-container" style={styles.messageContainer}>
+                                <img src={LogoInverted} className="ai-profile-picture-view" style={styles.aiProfilePictureView} width="24px" height="24px" />
+                                <div className="assistant-view-system-message" style={styles.systemMessage}>
                                     <div>{message.content.text}</div>
                                 </div>
                             </div>
@@ -155,6 +153,90 @@ class AssistantView extends React.Component<Props, State> { //implements Project
             return false;
         }
     }
+}
+
+const styles = {
+
+    assistantView: {
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        boxSizing: 'border-box',
+        transition: 'opacity 250ms',
+        width: '100%',
+        height: '100%'
+    } as React.CSSProperties,
+
+    messageContainer: {
+        display: "flex",
+        flexDirection: "column",
+        rowGap: "10px",
+        color: "#000000",
+        borderBottom: "solid 1px var(--black5)",
+        padding: "20px"
+    } as React.CSSProperties,
+
+    userMessage: {
+        boxSizing: "border-box",
+        userSelect: "text",
+        whiteSpace: "pre-wrap",
+        fontSize: "14px"
+    } as React.CSSProperties,
+
+    systemMessage: {
+        display: "flex",
+        flexDirection: "column",
+        rowGap: "8px",
+        boxSizing: "border-box",
+        userSelect: "text",
+        whiteSpace: "pre-wrap",
+        fontSize: "14px"
+    } as React.CSSProperties,
+
+    inputBox: {
+        position: "absolute",
+        bottom: "0px",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0px 20px 0px 20px",
+        boxSizing: "border-box",
+        columnGap: "12px",
+        borderTop: "solid 1px var(--black10)",
+        backdropFilter: "blur(12px)",
+        background: "#FFFFFFE6",
+        borderBottomLeftRadius: "6px",
+        borderBottomRightRadius: "6px",
+        height: "78px",
+        width: "100%",
+        transition: "150ms"
+    } as React.CSSProperties,
+
+    chatViewContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+    } as React.CSSProperties,
+
+    chatView: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        padding: '0px 0px 77px 0px',
+        boxSizing: 'border-box',
+    } as React.CSSProperties,
+
+    aiProfilePictureView: {
+        borderRadius: '50%',
+        border: 'solid',
+        borderColor: 'var(--white20)',
+        borderWidth: '1px',
+        width: '24px',
+        height: '24px',
+    } as React.CSSProperties
 }
 
 export default AssistantView;
