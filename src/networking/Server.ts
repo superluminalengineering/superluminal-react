@@ -1,5 +1,3 @@
-import axios from "axios";
-
 import { ChatMessage } from "../models/ChatMessage";
 import { SessionState } from "../models/SessionState";
 
@@ -32,17 +30,20 @@ class Server {
     static uploadData(file: File, userID: string, projectID: string): [AbortController, Promise<void>] {
         const controller = new AbortController()
         const url = `https://app.getluminal.com/users/${userID}/projects/${projectID}/data`
-        // Stream the request
-        const promise = axios.put(url, file, { // `file` is a JavaScript File object
+        const promise = fetch(url, {
+            method: 'PUT',
+            body: file,
             headers: {
                 "Authorization" : `Bearer ${Server.apiKey}`,
             },
-            onUploadProgress: (event) => {
-                const fraction = event.total ? (event.loaded / event.total) : 0
-                console.log(`Upload progress: ${fraction}`)
-            },
             signal: controller.signal
-        }).then(() => { });
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        }).catch(error => {
+            console.log('Fetch error: ', error);
+        });
         return [ controller, promise ];
     }
 }

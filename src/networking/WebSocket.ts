@@ -87,7 +87,7 @@ export class SLWebSocket extends WebSocket {
                     if (!this.isCurrent) { return; }
                     this.slState = SLWebSocketState.Open;
                     this.slListeners.forEach((listener) => {
-                        listener.onWebSocketStateChanged(SLWebSocketState.Open);
+                        listener.onWebSocketStateChanged?.(SLWebSocketState.Open);
                     });
                     this.sendBufferedMessages();
                 }).catch((error) => {
@@ -98,7 +98,7 @@ export class SLWebSocket extends WebSocket {
             } else {
                 this.slState = SLWebSocketState.Open;
                 this.slListeners.forEach((listener) => {
-                    listener.onWebSocketStateChanged(SLWebSocketState.Open);
+                    listener.onWebSocketStateChanged?.(SLWebSocketState.Open);
                 });
                 this.sendBufferedMessages();
             }
@@ -106,7 +106,7 @@ export class SLWebSocket extends WebSocket {
         } else {
             this.slState = SLWebSocketState.Open;
             this.slListeners.forEach((listener) => {
-                listener.onWebSocketStateChanged(SLWebSocketState.Open);
+                listener.onWebSocketStateChanged?.(SLWebSocketState.Open);
             });
             this.sendBufferedMessages();
         }
@@ -172,7 +172,7 @@ export class SLWebSocket extends WebSocket {
     private receive(base64EncodedData: string) {
         const json = JSON.parse(atob(base64EncodedData));
         this.slListeners.forEach((listener) => {
-            listener.onWebSocketEvent(json);
+            listener.onWebSocketEvent?.(json);
         });
     }
 
@@ -183,7 +183,7 @@ export class SLWebSocket extends WebSocket {
     private onClose(e: CloseEvent) {
         this.slState = SLWebSocketState.Closed;
         this.slListeners.forEach((listener) => {
-            listener.onWebSocketStateChanged(SLWebSocketState.Closed);
+            listener.onWebSocketStateChanged?.(SLWebSocketState.Closed);
         });
         if (this.pingTimeout) { clearTimeout(this.pingTimeout); }
         if (e.wasClean) {
