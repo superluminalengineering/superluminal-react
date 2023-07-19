@@ -1,15 +1,8 @@
-export type ChatEditorVM = {
-    version: number;
-    editor: Object;
-    messages: Message[];
-}
 
-export type Message = {
+export type ChatMessage = {
     id: string;
     sender: 'user' | 'assistant';
     content: TextContent | PlotContent;
-    isEphemeral?: boolean
-    timestamp: number;
 }
 
 export type TextContent = {

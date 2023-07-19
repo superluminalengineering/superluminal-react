@@ -35,14 +35,6 @@ class Superluminal extends React.Component<Props, State> {
             assistantMessageStyle={assistantMessageStyle}
             inputStyle={inputStyle}
             sendButtonStyle={sendButtonStyle}
-            editor={{
-                version: 0,
-                editor: {},
-                messages: [
-                    { id: '1', sender: 'user', content: { text: 'Filter to 2018 only' }, timestamp: 0 },
-                    { id: '2', sender: 'assistant', content: { text: 'Sure!' }, timestamp: 0 }
-                ]
-            }} 
         />
     }
 }

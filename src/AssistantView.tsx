@@ -4,13 +4,12 @@ import React from 'react'
 import InlineInput from './components/InlineInput';
 import ProfilePictureView from './components/ProfilePictureView';
 
-import { ChatEditorVM } from './models/ChatEditorVM';
+import { ChatMessage } from './models/ChatMessage';
 
 import LogoInverted from './images/logo_inverted.svg'
 import LogoText from './images/logo_text.svg'
 
 interface Props {
-    editor: ChatEditorVM
     userName: string
     style?: React.CSSProperties
     userProfilePictureStyle?: React.CSSProperties
@@ -22,8 +21,7 @@ interface Props {
 
 interface State {
     isProcessing: boolean
-    viewModelVersion: number
-    editor: ChatEditorVM
+    chatMessages: ChatMessage[]
 }
 
 class AssistantView extends React.Component<Props, State> { //implements ProjectControllerEventListener {
@@ -40,8 +38,10 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         this.chatMessagesContainerRef = React.createRef();
         this.state = { 
             isProcessing: false,
-            editor: props.editor, 
-            viewModelVersion: props.editor.version,
+            chatMessages: [
+                { id: '1', sender: 'user', content: { text: 'Filter to 2018 only' } },
+                { id: '2', sender: 'assistant', content: { text: 'Sure!' } }
+            ],
         };
         // props.editor.updateHandler = this.onViewModelUpdate.bind(this);
         this.onInputFocusChanged = this.onInputFocusChanged.bind(this);
@@ -60,21 +60,6 @@ class AssistantView extends React.Component<Props, State> { //implements Project
 
     componentWillUnmount() {
         // ProjectController.getInstance().then((instance) => instance.removeListener(this));
-    }
-
-    static getDerivedStateFromProps(props: Props, _: State) {
-        // Needed to reset this.state.editor when this.props.editor is changed
-        return { editor: props.editor };
-    }
-
-    onViewModelUpdate(_: Partial<ChatEditorVM>) {
-        this.setState({ viewModelVersion: this.props.editor.version });
-        setTimeout(() => {
-            const scrollView = this.scrollViewRef.current;
-            if (scrollView) {
-                scrollView.scrollTo({ top: scrollView.scrollHeight, behavior: 'smooth' });
-            }
-        }, 0);
     }
 
     shouldComponentUpdate(_newProps: Readonly<Props>, _newState: Readonly<State>): boolean {
@@ -99,11 +84,11 @@ class AssistantView extends React.Component<Props, State> { //implements Project
 
     getChatMessagesView(): any {
         const { userName, userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
-        const { editor } = this.state;
+        const { chatMessages } = this.state;
         const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
         return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
             <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
-                { editor.messages.map((message) => {
+                { chatMessages.map((message) => {
                     switch (message.sender) {
                     case 'user':
                         if ('text' in message.content) {
