@@ -24,7 +24,7 @@ class Superluminal extends React.Component<Props, State> {
         super(props);
         this.state = {};
         Server.apiKey = props.apiKey;
-        SessionController.getInstance().initialize();
+        SessionController.getInstance().initialize(props.userID);
     }
 
     render() {

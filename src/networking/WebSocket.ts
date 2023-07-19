@@ -170,7 +170,7 @@ export class SLWebSocket extends WebSocket {
 
     private receive(base64EncodedData: string) {
         const json = JSON.parse(atob(base64EncodedData));
-        console.log(`[Web Socket] Received web socket message: ${json}`);
+        console.log(`[Web Socket] Received web socket message: ${JSON.stringify(json)}`);
     }
 
     private onError(error: ErrorEvent) {

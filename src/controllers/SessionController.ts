@@ -10,6 +10,7 @@ export interface SessionControllerEventListener {
 
 class SessionController {
     listeners: SessionControllerEventListener[] = [];
+    userID: string | null = null;
     sessionState: SessionState = 'initializing';
     authToken: string | null = null;
 
@@ -37,16 +38,19 @@ class SessionController {
         this.listeners.splice(index, 1);
     }
 
-    initialize() {
-        Server.createSession("test_user_id", "test_project_id", false, false, 100)
+    initialize(userID: string) {
+        this.userID = userID;
+        Server.createSession(userID, "main", false, false, 100)
             .then((response) => {
                 this.sessionState = response.session_state;
                 this.authToken = response.token;
-                // this.listeners.forEach((listener) => listener.onChatMessagesUpdated(response.chat_history));
+                this.listeners.forEach((listener) => listener.onChatMessagesUpdated(response.chat_history));
             })
             .then(() => {
                 SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
-                SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
+                setTimeout(() => {
+                    SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
+                }, 0);
             })
     }
 
