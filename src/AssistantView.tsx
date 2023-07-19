@@ -26,14 +26,14 @@ interface State {
 }
 
 class AssistantView extends React.Component<Props, State> { //implements ProjectControllerEventListener {
-    inputBoxRef: React.RefObject<HTMLDivElement>;
+    inputContainerRef: React.RefObject<HTMLDivElement>;
     inputRef: React.RefObject<InlineInput>;
     scrollViewRef: React.RefObject<HTMLDivElement>;
     chatMessagesContainerRef: React.RefObject<HTMLDivElement>;
 
     constructor(props: Props) {
         super(props);
-        this.inputBoxRef = React.createRef();
+        this.inputContainerRef = React.createRef();
         this.inputRef = React.createRef();
         this.scrollViewRef = React.createRef();
         this.chatMessagesContainerRef = React.createRef();
@@ -83,12 +83,12 @@ class AssistantView extends React.Component<Props, State> { //implements Project
     render() {
         const { style } = this.props;
         return <div style={{ ...styles.assistantView, ...style }}>
-            { this.getChatContentView() }
-            { this.getInputBoxView() }
+            { this.getChatMessagesView() }
+            { this.getInputView() }
         </div>
     }
 
-    getChatContentView(): any {
+    getChatMessagesView(): any {
         const { userName, userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
         const { editor } = this.state;
         const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
@@ -113,7 +113,9 @@ class AssistantView extends React.Component<Props, State> { //implements Project
                             </div>
                         } else {
                             const plot = JSON.parse(message.content.plot);
-                            const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20; // The padding is currently fixed at 20 px
+                            // `offsetWidth` should always be set at this point. `320` is an arbitrary reasonable fallback.
+                            // The padding is currently fixed at 20 px on each side.
+                            const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20;
                             const height = ((plot.layout.width * width) / plot.layout.height);
                             const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
                             return <div style={styles.messageContainer}>
@@ -131,12 +133,12 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         </div>
     }
 
-    getInputBoxView(): any {
+    getInputView(): any {
         const { inputStyle, sendButtonStyle } = this.props;
         const { isProcessing } = this.state;
         const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: '#0000000D',
             width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity: isProcessing ? 0.5 : 1 };
-        return <div ref={this.inputBoxRef} style={styles.inputBox}>
+        return <div ref={this.inputContainerRef} style={styles.inputContainer}>
             <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onFocusChanged={this.onInputFocusChanged} onEnter={this.sendMessage} />
             <div style={{ ...styles.sendButton, ...{ width: '96px', opacity: isProcessing ? 0.5 : 1 }, ...sendButtonStyle }} onClick={this.sendMessage}>Send</div>
         </div>
@@ -168,7 +170,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         boxSizing: 'border-box',
-        transition: 'opacity 250ms',
+        transition: 'opacity 150ms',
         width: '100%',
         height: '100%',
         border: "solid 1px #0000001A",
@@ -225,7 +227,7 @@ const styles = {
         height: '24px',
     } as React.CSSProperties,
 
-    inputBox: {
+    inputContainer: {
         position: "absolute",
         bottom: "0px",
         display: "flex",
@@ -238,8 +240,6 @@ const styles = {
         borderTop: "solid 1px #0000001A",
         backdropFilter: "blur(12px)",
         background: "#FFFFFFE6",
-        borderBottomLeftRadius: "6px",
-        borderBottomRightRadius: "6px",
         height: "78px",
         width: "100%",
         transition: "150ms"
