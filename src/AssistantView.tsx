@@ -5,9 +5,11 @@ import InlineInput from './components/InlineInput';
 import { ChatEditorVM } from './models/ChatEditorVM';
 
 import LogoInverted from './images/logo_inverted.svg'
+import ProfilePictureView from './components/ProfilePictureView';
 
 interface Props {
     editor: ChatEditorVM
+    userName: string
     style?: React.CSSProperties
     inputStyle?: React.CSSProperties
     sendButtonStyle?: React.CSSProperties
@@ -81,25 +83,26 @@ class AssistantView extends React.Component<Props, State> { //implements Project
     }
 
     getChatContentView(): any {
+        const { userName } = this.props;
         const { editor } = this.state;
-        return <div ref={this.scrollViewRef} className="assistant-view-chat-view-container" style={styles.chatViewContainer}>
-            <div className="assistant-view-chat-view" style={styles.chatView}>
+        return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
+            <div style={styles.chatView}>
                 { editor.messages.map((message) => {
                     switch (message.sender) {
                     case 'user':
                         if ('text' in message.content) {
-                            return <div className="assistant-view-message-container" style={{ ...styles.messageContainer, background: '#00000004' }}>
-                                {/* <ProfilePictureView name={user.name ?? ''} style={{ width: '24px', height: '24px', fontSize: '10px' }} /> */}
-                                <div className="assistant-view-user-message" style={styles.userMessage}>{message.content.text}</div>
+                            return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
+                                <ProfilePictureView userName={userName} style={{ width: '24px', height: '24px', fontSize: '10px' }} />
+                                <div style={styles.userMessage}>{message.content.text}</div>
                             </div>
                         } else {
                             return '';
                         }
                     case 'assistant':
                         if ('text' in message.content) {
-                            return <div className="assistant-view-message-container" style={styles.messageContainer}>
-                                <img src={LogoInverted} className="ai-profile-picture-view" style={styles.aiProfilePictureView} width="24px" height="24px" />
-                                <div className="assistant-view-system-message" style={styles.systemMessage}>
+                            return <div style={styles.messageContainer}>
+                                <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                <div style={styles.systemMessage}>
                                     <div>{message.content.text}</div>
                                 </div>
                             </div>
@@ -163,7 +166,24 @@ const styles = {
         boxSizing: 'border-box',
         transition: 'opacity 250ms',
         width: '100%',
-        height: '100%'
+        height: '100%',
+        border: "solid 1px #0000001A",
+    } as React.CSSProperties,
+
+    chatScrollView: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+    } as React.CSSProperties,
+
+    chatView: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        padding: '0px 0px 77px 0px',
+        boxSizing: 'border-box',
     } as React.CSSProperties,
 
     messageContainer: {
@@ -171,7 +191,7 @@ const styles = {
         flexDirection: "column",
         rowGap: "10px",
         color: "#000000",
-        borderBottom: "solid 1px var(--black5)",
+        borderBottom: "solid 1px #0000000D",
         padding: "20px"
     } as React.CSSProperties,
 
@@ -192,6 +212,15 @@ const styles = {
         fontSize: "14px"
     } as React.CSSProperties,
 
+    profilePictureView: {
+        borderRadius: '50%',
+        border: 'solid',
+        borderColor: '#FFFFFF33',
+        borderWidth: '1px',
+        width: '24px',
+        height: '24px',
+    } as React.CSSProperties,
+
     inputBox: {
         position: "absolute",
         bottom: "0px",
@@ -202,7 +231,7 @@ const styles = {
         padding: "0px 20px 0px 20px",
         boxSizing: "border-box",
         columnGap: "12px",
-        borderTop: "solid 1px var(--black10)",
+        borderTop: "solid 1px #0000001A",
         backdropFilter: "blur(12px)",
         background: "#FFFFFFE6",
         borderBottomLeftRadius: "6px",
@@ -210,31 +239,6 @@ const styles = {
         height: "78px",
         width: "100%",
         transition: "150ms"
-    } as React.CSSProperties,
-
-    chatViewContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%',
-        overflowY: 'auto',
-    } as React.CSSProperties,
-
-    chatView: {
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        padding: '0px 0px 77px 0px',
-        boxSizing: 'border-box',
-    } as React.CSSProperties,
-
-    aiProfilePictureView: {
-        borderRadius: '50%',
-        border: 'solid',
-        borderColor: 'var(--white20)',
-        borderWidth: '1px',
-        width: '24px',
-        height: '24px',
     } as React.CSSProperties,
 
     sendButton: {
