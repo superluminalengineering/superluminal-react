@@ -25,6 +25,8 @@
     },
     "homepage": "https://getluminal.com",
     "dependencies": {
+        "base64-arraybuffer": "^1.0.2",
+        "isomorphic-ws": "^5.0.0",
         "plotly.js": "^2.24.3",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
