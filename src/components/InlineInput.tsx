@@ -1,10 +1,7 @@
 import * as React from 'react';
 
-import './InlineInput.css';
-
 interface Props {
     placeholder?: string
-    defaultValue?: string
     onContentChanged?: ((content: string) => void)
     type?: string
     style?: any
@@ -29,15 +26,14 @@ class InlineInput extends React.Component<Props, State> {
     }
 
     render() {
-        const { placeholder, defaultValue, style, type } = this.props;
+        const { placeholder, style, type } = this.props;
         return <input
             ref={this.ref}
             className="inline-input"
             name="text"
             type={ type ?? "text" }
-            style={ style }
+            style={{ ...styles.inlineInput, ...style }}
             placeholder={placeholder}
-            defaultValue={defaultValue}
             onKeyDown={this.onKeyDown}
             onFocus={this.onFocus}
             onBlur={this.onBlur}
@@ -115,6 +111,18 @@ class InlineInput extends React.Component<Props, State> {
         input.value = value;
         this.props.onContentChanged?.(value);
     }
+}
+
+const styles = {
+
+    inlineInput: {
+        boxSizing: 'border-box',
+        background: 'none',
+        color: '#000000',
+        border: 'none',
+        fontSize: '14px',
+        outline: 'none',
+    } as React.CSSProperties,
 }
 
 export default InlineInput;

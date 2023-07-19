@@ -1,8 +1,6 @@
 import React from 'react'
 
-// import Plot from 'react-plotly.js';
 import InlineInput from './components/InlineInput';
-// import ProfilePictureView from '../components/ProfilePictureView';
 
 import { ChatEditorVM } from './models/ChatEditorVM';
 
@@ -11,9 +9,12 @@ import LogoInverted from './images/logo_inverted.svg'
 interface Props {
     editor: ChatEditorVM
     style?: React.CSSProperties
+    inputStyle?: React.CSSProperties
+    sendButtonStyle?: React.CSSProperties
 }
 
 interface State {
+    isProcessing: boolean
     viewModelVersion: number
     editor: ChatEditorVM
 }
@@ -29,12 +30,13 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         this.inputRef = React.createRef();
         this.scrollViewRef = React.createRef();
         this.state = { 
+            isProcessing: false,
             editor: props.editor, 
             viewModelVersion: props.editor.version,
         };
         // props.editor.updateHandler = this.onViewModelUpdate.bind(this);
         this.onInputFocusChanged = this.onInputFocusChanged.bind(this);
-        this.execute = this.execute.bind(this);
+        this.sendMessage = this.sendMessage.bind(this);
     }
 
     componentDidMount() {
@@ -72,18 +74,13 @@ class AssistantView extends React.Component<Props, State> { //implements Project
 
     render() {
         const { style } = this.props;
-        const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: 'var(--black5)', boxSizing: 'border-box',
-            width: '100%', borderRadius: '6px', background: 'var(--black2)', height: '38px', opacity: this.isProcessing() ? 0.5 : 1 };
-        return <div className="assistant-view" style={{ ...styles.assistantView, ...style }}>
-            { this.getChatView() }
-            <div ref={this.inputBoxRef} className="assistant-view-input-box" style={styles.inputBox}>
-                <InlineInput ref={this.inputRef} placeholder="Type here..." style={inlineInputStyle} onFocusChanged={this.onInputFocusChanged} onEnter={this.execute} />
-                <div className="prominent-button" style={{ width: '96px', height: '35px', opacity: this.isProcessing() ? 0.5 : 1 }} onClick={this.execute}>Send</div>
-            </div>
+        return <div style={{ ...styles.assistantView, ...style }}>
+            { this.getChatContentView() }
+            { this.getInputBoxView() }
         </div>
     }
 
-    getChatView(): any {
+    getChatContentView(): any {
         const { editor } = this.state;
         return <div ref={this.scrollViewRef} className="assistant-view-chat-view-container" style={styles.chatViewContainer}>
             <div className="assistant-view-chat-view" style={styles.chatView}>
@@ -127,6 +124,17 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         </div>
     }
 
+    getInputBoxView(): any {
+        const { inputStyle, sendButtonStyle } = this.props;
+        const { isProcessing } = this.state;
+        const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: '#0000000D',
+            width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity: isProcessing ? 0.5 : 1 };
+        return <div ref={this.inputBoxRef} style={styles.inputBox}>
+            <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onFocusChanged={this.onInputFocusChanged} onEnter={this.sendMessage} />
+            <div style={{ ...styles.sendButton, ...{ width: '96px', opacity: isProcessing ? 0.5 : 1 }, ...sendButtonStyle }} onClick={this.sendMessage}>Send</div>
+        </div>
+    }
+
     onInputFocusChanged(focused: boolean) {
         if (focused) {
             // ProjectController.getInstance().then((instance) => {
@@ -135,23 +143,14 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         }
     }
 
-    execute() {
+    sendMessage() {
         const message = this.inputRef.current?.getContent() ?? null;
-        if (!message || message.length == 0 || this.isProcessing()) { return; }
+        const { isProcessing } = this.state;
+        if (!message || message.length == 0 || isProcessing) { return; }
         this.inputRef.current?.clear();
         // ProjectController.getInstance().then((instance) => {
         //     instance.sendMessage(message);
         // });
-    }
-
-    isProcessing(): boolean {
-        const messages = this.state.editor.messages;
-        if (messages.length > 0) {
-            const lastMessage = messages[messages.length - 1];
-            return (lastMessage.sender == 'assistant' && 'text' in lastMessage.content && lastMessage.isEphemeral == true);
-        } else {
-            return false;
-        }
     }
 }
 
@@ -236,7 +235,23 @@ const styles = {
         borderWidth: '1px',
         width: '24px',
         height: '24px',
-    } as React.CSSProperties
+    } as React.CSSProperties,
+
+    sendButton: {
+        height: '36px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#2C67FF',
+        color: '#FFFFFF',
+        padding: '0px 10px 0px 10px',
+        cursor: 'pointer',
+        fontWeight: 600,
+        fontSize: '14px',
+        boxSizing: 'border-box',
+        border: 'solid',
+        borderRadius: '6px',
+    } as React.CSSProperties,
 }
 
 export default AssistantView;

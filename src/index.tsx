@@ -1,7 +1,9 @@
 import React from 'react'
+
 import AssistantView from './AssistantView'
 
 class Superluminal extends React.Component {
+
   render() {
     return <AssistantView editor={{
       version: 0,
