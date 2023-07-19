@@ -1,6 +1,6 @@
 import React from 'react';
 
-import AssistantView from './AssistantView';
+import AssistantView from './components/AssistantView';
 import Server from './networking/Server';
 
 interface Props {

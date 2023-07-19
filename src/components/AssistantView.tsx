@@ -1,10 +1,10 @@
 import Plot from 'react-plotly.js';
 import React from 'react'
 
-import InlineInput from './components/InlineInput';
-import ProfilePictureView from './components/ProfilePictureView';
+import InlineInput from './InlineInput';
+import ProfilePictureView from './ProfilePictureView';
 
-import { ChatMessage } from './models/ChatMessage';
+import { ChatMessage } from '../models/ChatMessage';
 
 import LogoInverted from './images/logo_inverted.svg'
 import LogoText from './images/logo_text.svg'
@@ -43,7 +43,6 @@ class AssistantView extends React.Component<Props, State> { //implements Project
                 { id: '2', sender: 'assistant', content: { text: 'Sure!' } }
             ],
         };
-        // props.editor.updateHandler = this.onViewModelUpdate.bind(this);
         this.onInputFocusChanged = this.onInputFocusChanged.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
     }
