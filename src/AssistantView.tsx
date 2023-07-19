@@ -1,16 +1,20 @@
+import Plot from 'react-plotly.js';
 import React from 'react'
 
 import InlineInput from './components/InlineInput';
+import ProfilePictureView from './components/ProfilePictureView';
 
 import { ChatEditorVM } from './models/ChatEditorVM';
 
 import LogoInverted from './images/logo_inverted.svg'
-import ProfilePictureView from './components/ProfilePictureView';
 
 interface Props {
     editor: ChatEditorVM
     userName: string
     style?: React.CSSProperties
+    userProfilePictureStyle?: React.CSSProperties
+    userMessageStyle?: React.CSSProperties
+    assistantMessageStyle?: React.CSSProperties
     inputStyle?: React.CSSProperties
     sendButtonStyle?: React.CSSProperties
 }
@@ -25,12 +29,14 @@ class AssistantView extends React.Component<Props, State> { //implements Project
     inputBoxRef: React.RefObject<HTMLDivElement>;
     inputRef: React.RefObject<InlineInput>;
     scrollViewRef: React.RefObject<HTMLDivElement>;
+    chatMessagesContainerRef: React.RefObject<HTMLDivElement>;
 
     constructor(props: Props) {
         super(props);
         this.inputBoxRef = React.createRef();
         this.inputRef = React.createRef();
         this.scrollViewRef = React.createRef();
+        this.chatMessagesContainerRef = React.createRef();
         this.state = { 
             isProcessing: false,
             editor: props.editor, 
@@ -83,17 +89,18 @@ class AssistantView extends React.Component<Props, State> { //implements Project
     }
 
     getChatContentView(): any {
-        const { userName } = this.props;
+        const { userName, userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
         const { editor } = this.state;
+        const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
         return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
-            <div style={styles.chatView}>
+            <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
                 { editor.messages.map((message) => {
                     switch (message.sender) {
                     case 'user':
                         if ('text' in message.content) {
                             return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
-                                <ProfilePictureView userName={userName} style={{ width: '24px', height: '24px', fontSize: '10px' }} />
-                                <div style={styles.userMessage}>{message.content.text}</div>
+                                <ProfilePictureView userName={userName} style={combinedUserProfilePictureStyle} />
+                                <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
                             </div>
                         } else {
                             return '';
@@ -102,24 +109,21 @@ class AssistantView extends React.Component<Props, State> { //implements Project
                         if ('text' in message.content) {
                             return <div style={styles.messageContainer}>
                                 <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
-                                <div style={styles.systemMessage}>
-                                    <div>{message.content.text}</div>
-                                </div>
+                                <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
                             </div>
                         } else {
-                            // const plot = JSON.parse(message.content.plot);
-                            // const width = ProjectController.instance.rightPaneWidth - 2 * 20;
-                            // const height = ((plot.layout.width * width) / plot.layout.height);
-                            // const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
-                            // return <div className="assistant-view-message-container">
-                            //     <img src={LogoInverted} className="ai-profile-picture-view" width="24px" height="24px" />
-                            //     <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
-                            //         <div className="assistant-view-system-message" style={{ maxWidth: '100%', background: '#FFFFFF' }}>
-                            //             <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
-                            //         </div>
-                            //         <div className="neutral-button" style={{ height: '36px', width: '140px', padding: '0px 12px', boxSizing: 'border-box' }} onClick={() => { App.shared?.showPlot('plot', plot.data, layout) }}>Expand</div>
-                            //     </div>
-                            // </div>
+                            const plot = JSON.parse(message.content.plot);
+                            const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20; // The padding is currently fixed at 20 px
+                            const height = ((plot.layout.width * width) / plot.layout.height);
+                            const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
+                            return <div style={styles.messageContainer}>
+                                <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
+                                    <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
+                                        <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
+                                    </div>
+                                </div>
+                            </div>
                         }
                     }
                 }) }
@@ -178,7 +182,7 @@ const styles = {
         overflowY: 'auto',
     } as React.CSSProperties,
 
-    chatView: {
+    chatMessagesContainer: {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
@@ -202,7 +206,7 @@ const styles = {
         fontSize: "14px"
     } as React.CSSProperties,
 
-    systemMessage: {
+    assistantMessage: {
         display: "flex",
         flexDirection: "column",
         rowGap: "8px",

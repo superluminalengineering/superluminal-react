@@ -1,43 +1,46 @@
 {
-  "name": "superluminal-react",
-  "version": "1.0.0",
-  "description": "The official front-end React component for the Superluminal API.",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "type": "module",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "start": "rollup -c -w",
-    "build": "rollup -c",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/superluminalengineering/superluminal-react.git"
-  },
-  "author": "Superluminal Engineering, Inc.",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/superluminalengineering/superluminal-react/issues"
-  },
-  "homepage": "https://getluminal.com",
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.3",
-    "@rollup/plugin-image": "^3.0.2",
-    "@rollup/plugin-node-resolve": "^15.1.0",
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "rollup": "^3.26.3",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-typescript2": "^0.35.0",
-    "typescript": "^5.1.6"
-  }
+    "name": "superluminal-react",
+    "version": "1.0.0",
+    "description": "The official front-end React component for the Superluminal API.",
+    "main": "dist/index.cjs.js",
+    "module": "dist/index.esm.js",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "start": "rollup -c -w",
+        "build": "rollup -c",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/superluminalengineering/superluminal-react.git"
+    },
+    "author": "Superluminal Engineering, Inc.",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/superluminalengineering/superluminal-react/issues"
+    },
+    "homepage": "https://getluminal.com",
+    "dependencies": {
+        "plotly.js": "^2.24.3",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-plotly.js": "^2.6.0"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^25.0.3",
+        "@rollup/plugin-image": "^3.0.2",
+        "@rollup/plugin-node-resolve": "^15.1.0",
+        "@types/react": "^18.2.15",
+        "@types/react-dom": "^18.2.7",
+        "@types/react-plotly.js": "^2.6.0",
+        "rollup": "^3.26.3",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "rollup-plugin-postcss": "^4.0.2",
+        "rollup-plugin-typescript2": "^0.35.0",
+        "typescript": "^5.1.6"
+    }
 }
