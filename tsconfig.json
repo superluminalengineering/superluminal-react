@@ -3,7 +3,7 @@
         "outDir": "./dist",
         "module": "ESNext",
         "target": "es6",
-        "lib": ["dom", "es2015"],
+        "lib": ["dom", "es6"],
         "jsx": "react",
         "typeRoots" : ["./node_modules/@types", "./types"],
         "declaration": true,
