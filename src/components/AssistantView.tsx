@@ -41,6 +41,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
             ],
         };
         this.sendMessage = this.sendMessage.bind(this);
+        this.onChatMessagesUpdated = this.onChatMessagesUpdated.bind(this);
     }
 
     componentDidMount() {

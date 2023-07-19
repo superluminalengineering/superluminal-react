@@ -42,7 +42,7 @@ class SessionController {
             .then((response) => {
                 this.sessionState = response.session_state;
                 this.authToken = response.token;
-                this.listeners.forEach((listener) => listener.onChatMessagesUpdated(response.chat_history));
+                // this.listeners.forEach((listener) => listener.onChatMessagesUpdated(response.chat_history));
             })
             .then(() => {
                 SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
