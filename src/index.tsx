@@ -2,6 +2,7 @@ import React from 'react';
 
 import AssistantView from './components/AssistantView';
 import Server from './networking/Server';
+import SessionController from './controllers/SessionController';
 
 interface Props {
   apiKey: string
@@ -23,6 +24,7 @@ class Superluminal extends React.Component<Props, State> {
         super(props);
         this.state = {};
         Server.apiKey = props.apiKey;
+        SessionController.getInstance().initialize();
     }
 
     render() {

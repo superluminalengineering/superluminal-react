@@ -1,3 +1,5 @@
+import { ChatMessage } from "../models/ChatMessage";
+import { SessionState } from "../models/SessionState";
 
 class Server {
 
@@ -6,7 +8,7 @@ class Server {
 
     // TODO: Refresh auth token as needed
 
-    static createSession(userID: string, projectID: string, isTransient: boolean, isEditingAllowed: boolean, tablePageSize: number) {
+    static createSession(userID: string, projectID: string, isTransient: boolean, isEditingAllowed: boolean, tablePageSize: number): Promise<{ session_state: SessionState, token: string, chat_history: ChatMessage[] }> {
         return fetch(`${Server.baseURL}/sessions`, {
             method: "POST",
             headers: {
@@ -21,6 +23,8 @@ class Server {
                 table_page_size: tablePageSize,
             })
         })
+        .then((response) => response.json())
+        .catch((error) => console.log(`Couldn't create session due to error: ${error?.reason ?? error}`));
     }
 }
 

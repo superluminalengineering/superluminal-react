@@ -3,11 +3,12 @@ import React from 'react'
 
 import InlineInput from './InlineInput';
 import ProfilePictureView from './ProfilePictureView';
+import SessionController, { SessionControllerEventListener } from '../controllers/SessionController';
 
 import { ChatMessage } from '../models/ChatMessage';
 
-import LogoInverted from './images/logo_inverted.svg'
-import LogoText from './images/logo_text.svg'
+import LogoInverted from '../images/logo_inverted.svg'
+import LogoText from '../images/logo_text.svg'
 
 interface Props {
     userName: string
@@ -24,18 +25,14 @@ interface State {
     chatMessages: ChatMessage[]
 }
 
-class AssistantView extends React.Component<Props, State> { //implements ProjectControllerEventListener {
-    inputContainerRef: React.RefObject<HTMLDivElement>;
-    inputRef: React.RefObject<InlineInput>;
-    scrollViewRef: React.RefObject<HTMLDivElement>;
-    chatMessagesContainerRef: React.RefObject<HTMLDivElement>;
+class AssistantView extends React.Component<Props, State> implements SessionControllerEventListener {
+    inputContainerRef: React.RefObject<HTMLDivElement> = React.createRef();
+    inputRef: React.RefObject<InlineInput> = React.createRef();
+    scrollViewRef: React.RefObject<HTMLDivElement> = React.createRef();
+    chatMessagesContainerRef: React.RefObject<HTMLDivElement> = React.createRef();
 
     constructor(props: Props) {
         super(props);
-        this.inputContainerRef = React.createRef();
-        this.inputRef = React.createRef();
-        this.scrollViewRef = React.createRef();
-        this.chatMessagesContainerRef = React.createRef();
         this.state = { 
             isProcessing: false,
             chatMessages: [
@@ -43,12 +40,11 @@ class AssistantView extends React.Component<Props, State> { //implements Project
                 { id: '2', sender: 'assistant', content: { text: 'Sure!' } }
             ],
         };
-        this.onInputFocusChanged = this.onInputFocusChanged.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
     }
 
     componentDidMount() {
-        // ProjectController.getInstance().then((instance) => instance.addListener(this));
+        SessionController.getInstance().addListener(this);
         setTimeout(() => {
             const scrollView = this.scrollViewRef.current;
             if (scrollView) {
@@ -58,7 +54,7 @@ class AssistantView extends React.Component<Props, State> { //implements Project
     }
 
     componentWillUnmount() {
-        // ProjectController.getInstance().then((instance) => instance.removeListener(this));
+        SessionController.getInstance().removeListener(this);
     }
 
     shouldComponentUpdate(_newProps: Readonly<Props>, _newState: Readonly<State>): boolean {
@@ -132,17 +128,9 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: '#0000000D',
             width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity: isProcessing ? 0.5 : 1 };
         return <div ref={this.inputContainerRef} style={styles.inputContainer}>
-            <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onFocusChanged={this.onInputFocusChanged} onEnter={this.sendMessage} />
+            <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onEnter={this.sendMessage} />
             <div style={{ ...styles.sendButton, ...{ width: '96px', opacity: isProcessing ? 0.5 : 1 }, ...sendButtonStyle }} onClick={this.sendMessage}>Send</div>
         </div>
-    }
-
-    onInputFocusChanged(focused: boolean) {
-        if (focused) {
-            // ProjectController.getInstance().then((instance) => {
-            //     instance.handleComponentAcquiredSelectionFromJS('chat');
-            // });
-        }
     }
 
     sendMessage() {
@@ -150,9 +138,11 @@ class AssistantView extends React.Component<Props, State> { //implements Project
         const { isProcessing } = this.state;
         if (!message || message.length == 0 || isProcessing) { return; }
         this.inputRef.current?.clear();
-        // ProjectController.getInstance().then((instance) => {
-        //     instance.sendMessage(message);
-        // });
+        SessionController.getInstance().sendChatMessage(message);
+    }
+
+    onChatMessagesUpdated(chatMessages: ChatMessage[]) {
+        this.setState({ chatMessages });
     }
 }
 

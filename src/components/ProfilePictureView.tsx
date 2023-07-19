@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface Props { 
+interface Props {
     style?: React.CSSProperties
     userName: string
 }

@@ -3,6 +3,9 @@ import WebSocket from 'isomorphic-ws';
 import { decode } from 'base64-arraybuffer';
 
 import ArrayBufferUtilities from '../utilities/ArrayBufferUtilities';
+import SessionController from '../controllers/SessionController';
+
+import { WebSocketMessagePath } from '../models/WebSocketMessagePath';
 
 const maxFrameSize = (1 << 30);
 
@@ -26,7 +29,7 @@ export class SLWebSocket extends WebSocket {
     private onReconnect: () => Promise<void>;
     slState: SLWebSocketState = SLWebSocketState.Closed;
 
-    static instance?: SLWebSocket;
+    static instance: SLWebSocket;
 
     private constructor(url: string, buffer: ArrayBuffer[], listeners: SLWebSocketEventListener[], onReconnect: () => Promise<void>) {
         super(url);
@@ -41,10 +44,8 @@ export class SLWebSocket extends WebSocket {
     }
 
     static initialize(url: string, onReconnect: () => Promise<void>) {
-        if (SLWebSocket.instance === undefined) {
-            SLWebSocket.initializeWithBufferAndListeners(url, [], [], onReconnect);
-        }
-        return SLWebSocket.instance;
+        if (SLWebSocket.instance !== undefined) { return; }
+        SLWebSocket.initializeWithBufferAndListeners(url, [], [], onReconnect);
     }
 
     private static initializeWithBufferAndListeners(url: string, buffer: ArrayBuffer[], listeners: SLWebSocketEventListener[], onReconnect: () => Promise<void>) {
@@ -113,6 +114,15 @@ export class SLWebSocket extends WebSocket {
         this.sendPing(); // Start the ping loop
     }
 
+    slSend(path: WebSocketMessagePath, payload: any) {
+        const token = SessionController.getInstance().authToken;
+        if (!token) { return; }
+        const event = { ...payload, ...{ path: path, token: token } };
+        const base64EncodedEvent = btoa(JSON.stringify(event));
+        const bytes = decode(base64EncodedEvent)
+        this.sendOrBuffer(bytes);
+    }
+
     private sendOrBuffer(message: ArrayBuffer) {
         if (this.readyState === WebSocket.OPEN) {
             const chunkCount = Math.ceil(message.byteLength / maxFrameSize);
@@ -163,7 +173,8 @@ export class SLWebSocket extends WebSocket {
     }
 
     private receive(base64EncodedData: string) {
-        console.log(`[Web Socket] Received base 64 encoded data: ${base64EncodedData}`);
+        const json = JSON.parse(atob(base64EncodedData));
+        console.log(`[Web Socket] Received web socket message: ${json}`);
     }
 
     private onError(error: WebSocket.ErrorEvent) {
