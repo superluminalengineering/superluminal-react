@@ -39,8 +39,12 @@ class Superluminal extends React.Component<Props, State> {
     }
 
     setUser(user: { id: string, name: string }) {
-        SessionController.getInstance().initialize(user.id);
+        SessionController.getInstance().initialize(user);
         this.assistantViewRef.current?.setUser(user);
+    }
+
+    setData(file: File) {
+        SessionController.getInstance().uploadData(file);
     }
 }
 

@@ -6,6 +6,7 @@ import ProfilePictureView from './ProfilePictureView';
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController';
 
 import { ChatMessage } from '../models/ChatMessage';
+import { SessionState } from '../models/SessionState';
 
 import LogoInverted from '../images/logo_inverted.svg'
 import LogoText from '../images/logo_text.svg'
@@ -21,6 +22,7 @@ interface Props {
 
 interface State {
     user: { id: string, name: string } | null
+    sessionState: SessionState
     chatMessages: ChatMessage[]
     isProcessing: boolean
 }
@@ -34,11 +36,13 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     constructor(props: Props) {
         super(props);
         this.state = { 
-            user: null,
-            chatMessages: [],
+            user: SessionController.getInstance().user,
+            sessionState: SessionController.getInstance().sessionState,
+            chatMessages: SessionController.getInstance().chatMessages,
             isProcessing: false,
         };
         this.sendMessage = this.sendMessage.bind(this);
+        this.onSessionStateUpdated = this.onSessionStateUpdated.bind(this);
         this.onChatMessagesUpdated = this.onChatMessagesUpdated.bind(this);
     }
 
@@ -78,9 +82,9 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     getChatMessagesView(): any {
         const { userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
-        const { user, chatMessages } = this.state;
+        const { user, sessionState, chatMessages } = this.state;
         const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
-        if (user) {
+        if (user && sessionState == 'ready') {
             return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
                 <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
                     <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
@@ -151,6 +155,10 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     setUser(user: { id: string, name: string }) {
         this.setState({ user });
+    }
+
+    onSessionStateUpdated(sessionState: SessionState) {
+        this.setState({ sessionState });
     }
 
     onChatMessagesUpdated(chatMessages: ChatMessage[]) {
