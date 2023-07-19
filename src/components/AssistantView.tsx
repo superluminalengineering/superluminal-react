@@ -11,7 +11,6 @@ import LogoInverted from '../images/logo_inverted.svg'
 import LogoText from '../images/logo_text.svg'
 
 interface Props {
-    userName: string
     style?: React.CSSProperties
     userProfilePictureStyle?: React.CSSProperties
     userMessageStyle?: React.CSSProperties
@@ -21,8 +20,9 @@ interface Props {
 }
 
 interface State {
-    isProcessing: boolean
+    user: { id: string, name: string } | null
     chatMessages: ChatMessage[]
+    isProcessing: boolean
 }
 
 class AssistantView extends React.Component<Props, State> implements SessionControllerEventListener {
@@ -34,11 +34,12 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     constructor(props: Props) {
         super(props);
         this.state = { 
-            isProcessing: false,
+            user: null,
             chatMessages: [
                 { id: '1', sender: 'user', content: { text: 'Filter to 2018 only' } },
                 { id: '2', sender: 'assistant', content: { text: 'Sure!' } }
             ],
+            isProcessing: false,
         };
         this.sendMessage = this.sendMessage.bind(this);
         this.onChatMessagesUpdated = this.onChatMessagesUpdated.bind(this);
@@ -79,17 +80,18 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     }
 
     getChatMessagesView(): any {
-        const { userName, userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
-        const { chatMessages } = this.state;
+        const { userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
+        const { user, chatMessages } = this.state;
         const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
-        return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
-            <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
+        let content: any;
+        if (user) {
+            content = <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
                 { chatMessages.map((message) => {
                     switch (message.sender) {
                     case 'user':
                         if ('text' in message.content) {
                             return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
-                                <ProfilePictureView userName={userName} style={combinedUserProfilePictureStyle} />
+                                <ProfilePictureView userName={user.name} style={combinedUserProfilePictureStyle} />
                                 <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
                             </div>
                         } else {
@@ -120,6 +122,15 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                     }
                 }) }
             </div>
+        } else {
+            content = <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
+                Loading...
+            </div>
+        }
+        return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
+            <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
+                { content }
+            </div>
         </div>
     }
 
@@ -140,6 +151,10 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         if (!message || message.length == 0 || isProcessing) { return; }
         this.inputRef.current?.clear();
         SessionController.getInstance().sendChatMessage(message);
+    }
+
+    setUser(user: { id: string, name: string }) {
+        this.setState({ user });
     }
 
     onChatMessagesUpdated(chatMessages: ChatMessage[]) {

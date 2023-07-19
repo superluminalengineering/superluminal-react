@@ -6,8 +6,6 @@ import SessionController from './controllers/SessionController';
 
 interface Props {
   apiKey: string
-  userName: string
-  userID: string
   style?: React.CSSProperties
   userProfilePictureStyle?: React.CSSProperties
   userMessageStyle?: React.CSSProperties
@@ -19,18 +17,18 @@ interface Props {
 interface State { }
 
 class Superluminal extends React.Component<Props, State> {
+    assistantViewRef = React.createRef<AssistantView>();
 
     constructor(props: Props) {
         super(props);
         this.state = {};
         Server.apiKey = props.apiKey;
-        SessionController.getInstance().initialize(props.userID);
     }
 
     render() {
-        const { userName, style, userProfilePictureStyle, userMessageStyle, assistantMessageStyle, inputStyle, sendButtonStyle } = this.props;
+        const { style, userProfilePictureStyle, userMessageStyle, assistantMessageStyle, inputStyle, sendButtonStyle } = this.props;
         return <AssistantView
-            userName={userName}
+            ref={this.assistantViewRef}
             style={style}
             userProfilePictureStyle={userProfilePictureStyle}
             userMessageStyle={userMessageStyle}
@@ -38,6 +36,11 @@ class Superluminal extends React.Component<Props, State> {
             inputStyle={inputStyle}
             sendButtonStyle={sendButtonStyle}
         />
+    }
+
+    setUser(user: { id: string, name: string }) {
+        SessionController.getInstance().initialize(user.id);
+        this.assistantViewRef.current?.setUser(user);
     }
 }
 
