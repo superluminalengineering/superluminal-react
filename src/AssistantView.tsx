@@ -92,8 +92,8 @@ class AssistantView extends React.Component<Props, State> { //implements Project
 
     getWatermarkView(): any {
         return <div style={styles.watermark}>
-            <span style={{ opacity: 0.4 }}>Powered by</span>
-            <img src={LogoText} height="18px" style={{ opacity: 0.4, marginTop: '1px' }} />
+            <span style={{ opacity: 0.4, fontSize: '11px' }}>Powered by</span>
+            <img src={LogoText} height="14px" style={{ opacity: 0.4, marginTop: '1px' }} />
         </div>
     }
 
@@ -198,7 +198,7 @@ const styles = {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        columnGap: '9px',
+        columnGap: '8px',
     } as React.CSSProperties,
 
     chatScrollView: {
