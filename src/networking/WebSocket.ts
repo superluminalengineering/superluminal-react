@@ -1,9 +1,7 @@
-import WebSocket from 'isomorphic-ws';
 
 import { decode } from 'base64-arraybuffer';
 
 import ArrayBufferUtilities from '../utilities/ArrayBufferUtilities';
-import SessionController from '../controllers/SessionController';
 
 import { WebSocketMessagePath } from '../models/WebSocketMessagePath';
 
@@ -20,8 +18,8 @@ export interface SLWebSocketEventListener {
 export class SLWebSocket extends WebSocket {
     /** Holds messages while the connection is closed. */
     private buffer: ArrayBuffer[];
-    private pingTimeout: NodeJS.Timeout | null = null;
-    private reconnectTimeout: NodeJS.Timeout | null = null;
+    private pingTimeout: number | null = null;
+    private reconnectTimeout: number | null = null;
     private isReconnecting = false;
     private isCurrent = true;
     private slURL: string;
@@ -81,7 +79,7 @@ export class SLWebSocket extends WebSocket {
         SLWebSocket.instance!.isReconnecting = true;
     }
 
-    private onOpen(_: WebSocket.Event) {
+    private onOpen(_: Event) {
         if (this.isReconnecting) {
             if (this.onReconnect) {
                 this.onReconnect().then(() => {
@@ -114,9 +112,7 @@ export class SLWebSocket extends WebSocket {
         this.sendPing(); // Start the ping loop
     }
 
-    slSend(path: WebSocketMessagePath, payload: any) {
-        const token = SessionController.getInstance().authToken;
-        if (!token) { return; }
+    slSend(path: WebSocketMessagePath, token: string, payload: any) {
         const event = { ...payload, ...{ path: path, token: token } };
         const base64EncodedEvent = btoa(JSON.stringify(event));
         const bytes = decode(base64EncodedEvent)
@@ -128,8 +124,8 @@ export class SLWebSocket extends WebSocket {
             const chunkCount = Math.ceil(message.byteLength / maxFrameSize);
             for (let i = 0; i < chunkCount; i++) {
                 const chunk = message.slice(i * maxFrameSize, Math.min((i+1) * maxFrameSize, message.byteLength));
-                const isLastChunk = (i == chunkCount-1);
-                this.send(chunk, { fin: isLastChunk });
+                // const isLastChunk = (i == chunkCount-1);
+                this.send(chunk); // TODO: { fin: isLastChunk }
             }
         } else {
             // The connection is closed; buffer the message
@@ -156,7 +152,7 @@ export class SLWebSocket extends WebSocket {
         }
     }
 
-    private onMessage(message: WebSocket.MessageEvent) {
+    private onMessage(message: MessageEvent) {
         const data = message.data;
         if (data instanceof Blob) {
             data.arrayBuffer().then((arrayBuffer) => {
@@ -165,7 +161,7 @@ export class SLWebSocket extends WebSocket {
         } else if (typeof data === 'string') {
             if (data == 'pong') { return }
             console.log('Received unexpected string message from WebSocket:', data)
-        } else if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) {
+        } else if (data instanceof ArrayBuffer) {
             this.receive(ArrayBufferUtilities.toBase64(data));
         } else {
             console.log('Received unexpected content from WebSocket:', data)
@@ -177,11 +173,11 @@ export class SLWebSocket extends WebSocket {
         console.log(`[Web Socket] Received web socket message: ${json}`);
     }
 
-    private onError(error: WebSocket.ErrorEvent) {
+    private onError(error: ErrorEvent) {
         console.log(`[Web Socket] Error: ${error.message}.`);
     }
 
-    private onClose(e: WebSocket.CloseEvent) {
+    private onClose(e: CloseEvent) {
         this.slState = SLWebSocketState.Closed;
         this.slListeners.forEach((listener) => {
             listener.onWebSocketStateChanged(SLWebSocketState.Closed);
@@ -204,7 +200,7 @@ export class SLWebSocket extends WebSocket {
     private sendPing() {
         if (this.pingTimeout) { clearTimeout(this.pingTimeout); }
         if (this.readyState === WebSocket.OPEN) {
-            this.send('ping', { fin: true }) // Custom ping as browser WebSocket does not support native ping
+            this.send('ping') // Custom ping as browser WebSocket does not support native ping
         } else {
             // Try to reconnect after a short delay
             if (this.readyState !== WebSocket.CONNECTING) {

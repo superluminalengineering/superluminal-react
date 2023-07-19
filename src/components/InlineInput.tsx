@@ -14,7 +14,7 @@ interface State { }
 
 class InlineInput extends React.Component<Props, State> {
     ref: React.RefObject<HTMLInputElement>;
-    timeout: NodeJS.Timeout | null = null;
+    timeout: number | null = null;
 
     constructor(props: Props) {
         super(props);

@@ -46,7 +46,7 @@ class SessionController {
             })
             .then(() => {
                 SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
-                SLWebSocket.instance.slSend('connect-socket', {});
+                SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
             })
     }
 
