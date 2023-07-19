@@ -1,6 +1,7 @@
-import React from 'react'
+import React from 'react';
 
-import AssistantView from './AssistantView'
+import AssistantView from './AssistantView';
+import Server from './networking/Server';
 
 interface Props {
   apiKey: string
