@@ -41,7 +41,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
             chatMessages: SessionController.getInstance().chatMessages,
             isProcessing: false,
         };
-        this.sendMessage = this.sendMessage.bind(this);
+        this.sendChatMessage = this.sendChatMessage.bind(this);
         this.onSessionStateUpdated = this.onSessionStateUpdated.bind(this);
         this.onChatMessagesUpdated = this.onChatMessagesUpdated.bind(this);
     }
@@ -87,43 +87,41 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         if (user && sessionState == 'ready') {
             return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
                 <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
-                    <div ref={this.chatMessagesContainerRef} style={styles.chatMessagesContainer}>
-                        { chatMessages.map((message) => {
-                            switch (message.sender) {
-                            case 'user':
-                                if ('text' in message.content) {
-                                    return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
-                                        <ProfilePictureView userName={user.name} style={combinedUserProfilePictureStyle} />
-                                        <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
-                                    </div>
-                                } else {
-                                    return '';
-                                }
-                            case 'assistant':
-                                if ('text' in message.content) {
-                                    return <div style={styles.messageContainer}>
-                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
-                                        <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
-                                    </div>
-                                } else {
-                                    const plot = JSON.parse(message.content.plot);
-                                    // `offsetWidth` should always be set at this point. `320` is an arbitrary reasonable fallback.
-                                    // The padding is currently fixed at 20 px on each side.
-                                    const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20;
-                                    const height = ((plot.layout.width * width) / plot.layout.height);
-                                    const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
-                                    return <div style={styles.messageContainer}>
-                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
-                                        <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
-                                            <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
-                                                <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
-                                            </div>
+                    { chatMessages.map((message) => {
+                        switch (message.sender) {
+                        case 'user':
+                            if ('text' in message.content) {
+                                return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
+                                    <ProfilePictureView userName={user.name} style={combinedUserProfilePictureStyle} />
+                                    <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
+                                </div>
+                            } else {
+                                return '';
+                            }
+                        case 'assistant':
+                            if ('text' in message.content) {
+                                return <div style={styles.messageContainer}>
+                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                    <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
+                                </div>
+                            } else {
+                                const plot = JSON.parse(message.content.plot);
+                                // `offsetWidth` should always be set at this point. `320` is an arbitrary reasonable fallback.
+                                // The padding is currently fixed at 20 px on each side.
+                                const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20;
+                                const height = ((plot.layout.width * width) / plot.layout.height);
+                                const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
+                                return <div style={styles.messageContainer}>
+                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                    <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
+                                        <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
+                                            <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
                                         </div>
                                     </div>
-                                }
+                                </div>
                             }
-                        }) }
-                    </div>
+                        }
+                    }) }
                 </div>
             </div>
         } else {
@@ -140,12 +138,12 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: '#0000000D',
             width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity: isProcessing ? 0.5 : 1 };
         return <div ref={this.inputContainerRef} style={styles.inputContainer}>
-            <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onEnter={this.sendMessage} />
-            <div style={{ ...styles.sendButton, ...{ width: '96px', opacity: isProcessing ? 0.5 : 1 }, ...sendButtonStyle }} onClick={this.sendMessage}>Send</div>
+            <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onEnter={this.sendChatMessage} />
+            <div style={{ ...styles.sendButton, ...{ width: '96px', opacity: isProcessing ? 0.5 : 1 }, ...sendButtonStyle }} onClick={this.sendChatMessage}>Send</div>
         </div>
     }
 
-    sendMessage() {
+    sendChatMessage() {
         const message = this.inputRef.current?.getContent() ?? null;
         const { isProcessing } = this.state;
         if (!message || message.length == 0 || isProcessing) { return; }
