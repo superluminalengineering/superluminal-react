@@ -59,6 +59,10 @@ class SessionController implements SLWebSocketEventListener {
                 SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
                 SLWebSocket.instance.addSLListener(this);
                 setTimeout(() => {
+                    if (!this.authToken) {
+                        console.log("Couldn't connect web socket due to missing auth token.")
+                        return;
+                    }
                     SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
                 }, 0);
             });

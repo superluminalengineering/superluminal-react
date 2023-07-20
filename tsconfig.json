@@ -9,6 +9,7 @@
         "declaration": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
+        "strictNullChecks": true
     },
     "include": ["./src", "./types" ],
     "exclude": ["node_modules"]
