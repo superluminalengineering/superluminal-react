@@ -83,6 +83,11 @@ class SessionController implements SLWebSocketEventListener {
         });
     }
 
+    getTablePage(tableID: string, offset: number, count: number) {
+        if (!this.authToken) { return; }
+        SLWebSocket.instance.slSend('get-table-page', this.authToken, { table_id: tableID, offset: offset, count: count });
+    }
+
     onWebSocketEvent(json: JSON) {
         const path = json['path'];
         if (!path) { return; }

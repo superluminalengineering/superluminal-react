@@ -5,7 +5,8 @@ import TableCell from './TableCell'
 import MeasureUtilities from '../utilities/MeasureUtilities'
 import ObjectUtilities from '../utilities/ObjectUtilities'
 import TableData, { RowSlice, TableColumnVM } from './TableData'
-import { TableRow } from '../models/TableInfo'
+import SessionController, { SessionControllerEventListener } from '../controllers/SessionController'
+import { TablePage } from '../models/TableInfo'
 
 interface Props {
     table: TableData
@@ -15,10 +16,10 @@ interface State {
     rowSlice: RowSlice
     scrollX: number
     scrollY: number
-    fetchingRows: { startRow: number, endRow: number } | null
+    fetchState: { offset: number, count: number } | null
 }
 
-class TableView extends React.Component<Props, State> {
+class TableView extends React.Component<Props, State> implements SessionControllerEventListener {
     scrollViewRef: React.RefObject<HTMLDivElement>
 
     static scrollbarWidth = 8
@@ -30,7 +31,7 @@ class TableView extends React.Component<Props, State> {
             rowSlice: { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] },
             scrollX: 0,
             scrollY: 0,
-            fetchingRows: null,
+            fetchState: props.table.fetchState,
         }
         this.scrollViewRef = React.createRef()
         this.onResize = this.onResize.bind(this)
@@ -38,12 +39,21 @@ class TableView extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        SessionController.getInstance().addListener(this);
         window.addEventListener('resize', this.onResize)
         this.handleScrollChanged()
     }
 
     componentWillUnmount(): void {
+        SessionController.getInstance().removeListener(this);
         window.removeEventListener('resize', this.onResize)
+    }
+
+    onTablePageReceived(page: TablePage) {
+        const { table } = this.props
+        table.handleFetchedPage(page)
+        this.handleScrollChanged()
+        this.setState({ fetchState: table.fetchState })
     }
 
     shouldComponentUpdate(props: Readonly<Props>, state: Readonly<State>): boolean {
@@ -54,7 +64,7 @@ class TableView extends React.Component<Props, State> {
 
     render() {
         const { table } = this.props
-        const { rowSlice, scrollX, scrollY, fetchingRows } = this.state
+        const { rowSlice, scrollX, scrollY } = this.state
         const { columns, numberOfRows } = table
         const indexWidth = computeIndexWidth(numberOfRows) // TODO: For filtered views, numberOfRows != maxLabel
         const columnWidths = columns.map(computeColumnWidth)
@@ -87,7 +97,7 @@ class TableView extends React.Component<Props, State> {
                         <div style={{ display: 'flex' }}>
                             <div className="table-view-index" style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
                                 { rowSlice.rows.map((row, n) => {
-                                    if (!row) { return <div style={{ height: 32, backgroundColor: 'red' }}></div> } // TODO
+                                    if (!row) { return <div style={{ height: 32 }}></div> } // TODO
                                     const rowIndex = rowSlice.startIndex + n
                                     const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                                     const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
@@ -101,14 +111,19 @@ class TableView extends React.Component<Props, State> {
                             </div>
                             <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY }}>
                                 { rowSlice.rows.map((row, n) => {
-                                    if (!row) { return <div style={{ height: 32, backgroundColor: 'orange' }}></div> } // TODO
+                                    if (!row) { return <div style={{ height: 32 }}></div> } // TODO
                                     const rowIndex = rowSlice.startIndex + n
                                     const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                                     const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
                                     const cellHeight = rowSlice.rowHeights[n]
                                     const rowHeight = rowSlice.rowHeights[n] + (isLastRow ? 8 : 0)
                                     const background = (rowIndex % 2 == 0) ? '#fcfcfc' : '#ffffff'
-                                    const isLoading = fetchingRows && (rowIndex >= fetchingRows.startRow && rowIndex < fetchingRows.endRow)
+
+                                    let isLoading = false
+                                    if (table.fetchState) {
+                                        const { offset, count } = table.fetchState
+                                        isLoading = (rowIndex >= offset) && (rowIndex < offset + count)
+                                    }
 
                                     if (isLoading) {
                                         const width = Math.max(totalTableWidth, availableWidth - indexWidth) + 32 // TODO: Why do we need to add 32?
@@ -156,13 +171,10 @@ class TableView extends React.Component<Props, State> {
         const viewHeight = this.scrollViewRef.current?.clientHeight ?? 0
         const [ minY, maxY ] = [ scrollY, scrollY + viewHeight ]
         this.setState((state, props) => {
-            const rowSliceNeedsUpdate = (minY < state.rowSlice.startY || maxY > state.rowSlice.endY)
-            let rowSlice = state.rowSlice
-            if (rowSliceNeedsUpdate) {
-                rowSlice = props.table.rowSlice({ minY: scrollY, maxY: maxY })
-                    ?? { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] }
-            }
-            return { rowSlice, scrollX, scrollY }
+            const { table } = props
+            const rowSlice = table.rowSlice({ minY, maxY }, { fetchIfNeeded: true })
+                ?? { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] }
+            return { rowSlice, scrollX, scrollY, fetchState: table.fetchState }
         })
     }
     // #endregion
