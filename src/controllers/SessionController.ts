@@ -5,10 +5,13 @@ import UUIDUtilities from "../utilities/UUIDUtilities";
 import { ChatMessage } from "../models/ChatMessage";
 import { SessionState } from "../models/SessionState";
 import { SLWebSocket, SLWebSocketEventListener } from "../networking/WebSocket";
+import { TableInfo, TablePage, isTableInfo, isTablePage } from "../models/TableInfo";
 
 export interface SessionControllerEventListener {
-    onSessionStateUpdated: (sessionState: SessionState) => void;
-    onChatMessagesUpdated: (chatMessages: ChatMessage[]) => void;
+    onSessionStateUpdated?: (sessionState: SessionState) => void;
+    onChatMessagesUpdated?: (chatMessages: ChatMessage[]) => void;
+    onTableUpdated?: (table: TableInfo) => void;
+    onTablePageReceived?: (page: TablePage) => void;
 }
 
 class SessionController implements SLWebSocketEventListener {
@@ -50,9 +53,9 @@ class SessionController implements SLWebSocketEventListener {
         Server.getSession()
             .then((response) => {
                 this.sessionState = response.session_state;
-                this.listeners.forEach((listener) => listener.onSessionStateUpdated(response.session_state));
+                this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(response.session_state));
                 this.chatMessages = response.chat_history;
-                this.listeners.forEach((listener) => listener.onChatMessagesUpdated(response.chat_history));
+                this.listeners.forEach((listener) => listener.onChatMessagesUpdated?.(response.chat_history));
             })
             .then(() => {
                 SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
@@ -85,10 +88,10 @@ class SessionController implements SLWebSocketEventListener {
         if (!path) { return; }
         switch (path) {
             case 'message': this.onMessageReceived(json); break;
-            case 'update-table': break; // TODO: Implement
             case 'update-session-state': this.onSessionStateUpdated(json); break;
-            case 'table-page': break; // TODO: Implement
             case 'update-assistant-reply-state': this.onAssistantStateUpdated(json); break;
+            case 'update-table': this.onTableUpdated(json); break;
+            case 'table-page': this.onTablePageReceived(json); break;
             default: break;
         }
     }
@@ -106,7 +109,7 @@ class SessionController implements SLWebSocketEventListener {
         if (!sessionState) { return; }
         this.sessionState = sessionState;
         console.log(`Session state: ${sessionState}`);
-        this.listeners.forEach((listener) => listener.onSessionStateUpdated(sessionState));
+        this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(sessionState));
     }
 
     onAssistantStateUpdated(json: JSON) {
@@ -134,10 +137,22 @@ class SessionController implements SLWebSocketEventListener {
         });
     }
 
+    onTableUpdated(json: any) {
+        const table = json
+        if (!isTableInfo(table)) { return }
+        this.listeners.forEach((listener) => listener.onTableUpdated?.(table));    
+    }
+
+    onTablePageReceived(json: any) {
+        const page = json.page
+        if (!isTablePage(page)) { return }
+        this.listeners.forEach((listener) => listener.onTablePageReceived?.(page));
+    }
+
     addChatMessage(message: ChatMessage) {
         this.chatMessages = this.chatMessages.filter((chatMessage) => !chatMessage.isEphemeral);
         this.chatMessages.push(message);
-        this.listeners.forEach((listener) => listener.onChatMessagesUpdated(this.chatMessages));
+        this.listeners.forEach((listener) => listener.onChatMessagesUpdated?.(this.chatMessages));
     }
 
     onReconnectWebSocket(): Promise<void> {
