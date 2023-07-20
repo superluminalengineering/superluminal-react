@@ -1,11 +1,10 @@
 import React from 'react';
 
 import AssistantView from './components/AssistantView';
-import Server from './networking/Server';
 import SessionController from './controllers/SessionController';
 
 interface Props {
-  apiKey: string
+  authToken: string
   style?: React.CSSProperties
   userProfilePictureStyle?: React.CSSProperties
   userMessageStyle?: React.CSSProperties
@@ -22,10 +21,10 @@ class Superluminal extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {};
-        if (!props.apiKey) {
+        if (!props.authToken) {
             console.log('You must provide a valid Superluminal API key.');
         }
-        Server.apiKey = props.apiKey;
+        SessionController.getInstance().authToken = props.authToken;
     }
 
     render() {
@@ -50,13 +49,6 @@ class Superluminal extends React.Component<Props, State> {
         }
         SessionController.getInstance().initialize(user);
         this.assistantViewRef.current?.setUser(user);
-    }
-
-    setData(file: File) {
-        if (file.size == 0) {
-            return console.log('You must provide a non-empty data file.');
-        }
-        SessionController.getInstance().uploadData(file);
     }
 }
 

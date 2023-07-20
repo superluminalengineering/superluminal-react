@@ -47,9 +47,8 @@ class SessionController implements SLWebSocketEventListener {
 
     initialize(user: { id: string, name: string }) {
         this.user = user;
-        Server.createSession(user.id, this.projectID, false, false, 100)
+        Server.getSession()
             .then((response) => {
-                this.authToken = response.token;
                 this.sessionState = response.session_state;
                 this.listeners.forEach((listener) => listener.onSessionStateUpdated(response.session_state));
                 this.chatMessages = response.chat_history;
@@ -66,11 +65,6 @@ class SessionController implements SLWebSocketEventListener {
                     SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
                 }, 0);
             });
-    }
-
-    uploadData(file: File) {
-        if (!this.user) { return; }
-        const _ = Server.uploadData(file, this.user.id, this.projectID);
     }
 
     sendChatMessage(message: string) {
