@@ -39,10 +39,10 @@ class Server {
             signal: controller.signal
         }).then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                console.log(`Couldn't upload data due to error: ${response}`);
             }
         }).catch(error => {
-            console.log('Fetch error: ', error);
+            console.log(`Couldn't upload data due to error: ${error}`);
         });
         return [ controller, promise ];
     }
