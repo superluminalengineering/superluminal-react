@@ -22,6 +22,9 @@ class Superluminal extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {};
+        if (!props.apiKey) {
+            console.log('You must provide a valid Superluminal API key.');
+        }
         Server.apiKey = props.apiKey;
     }
 
@@ -39,11 +42,20 @@ class Superluminal extends React.Component<Props, State> {
     }
 
     setUser(user: { id: string, name: string }) {
+        if (!user.id) {
+            return console.log('You must provide a valid user ID.');
+        }
+        if (!user.name) {
+            return console.log('You must provide a valid user name.');
+        }
         SessionController.getInstance().initialize(user);
         this.assistantViewRef.current?.setUser(user);
     }
 
     setData(file: File) {
+        if (file.size == 0) {
+            return console.log('You must provide a non-empty data file.');
+        }
         SessionController.getInstance().uploadData(file);
     }
 }

@@ -61,7 +61,7 @@ class SessionController implements SLWebSocketEventListener {
                 setTimeout(() => {
                     SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
                 }, 0);
-            })
+            });
     }
 
     uploadData(file: File) {

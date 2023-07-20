@@ -42,7 +42,7 @@ class Server {
                 console.log(`Couldn't upload data due to error: ${response}`);
             }
         }).catch(error => {
-            console.log(`Couldn't upload data due to error: ${error}`);
+            console.log(`Couldn't upload data due to error: ${error?.reason ?? error}`);
         });
         return [ controller, promise ];
     }

@@ -161,11 +161,11 @@ export class SLWebSocket extends WebSocket {
             });
         } else if (typeof data === 'string') {
             if (data == 'pong') { return }
-            console.log('Received unexpected string message from WebSocket:', data)
+            console.log('Received unexpected string message from web socket:', data)
         } else if (data instanceof ArrayBuffer) {
             this.receive(ArrayBufferUtilities.toBase64(data));
         } else {
-            console.log('Received unexpected content from WebSocket:', data)
+            console.log('Received unexpected content from web socket:', data)
         }
     }
 
@@ -197,7 +197,7 @@ export class SLWebSocket extends WebSocket {
         // Status codes: https://www.rfc-editor.org/rfc/rfc6455.html#section-7.4.1
         // > 1000 indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled.
         // The browser socket does not accept anything other than 1000, or 3000-4999.
-        this.close(1000, 'WebSocket was disconnected by the client.');
+        this.close(1000, 'Web socket was disconnected by the client.');
     }
 
     private sendPing() {
