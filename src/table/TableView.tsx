@@ -72,89 +72,71 @@ class TableView extends React.Component<Props, State> implements SessionControll
         const totalBodyWidth = columnWidths.reduce((a, b) => a + b, 0)
         const totalBodyHeight = numberOfRows * TableView.minRowHeight
         const startColumnX = -scrollX
-        const shadow = '0px 0px 4px 0px #e6e6e6'
-        const availableWidth = 320//720 // TODO
-        const availableHeight = 496
+        const shadow = '0px 0px 4px 0px #e6e6e6'    
 
-        return <div className="table-view-wrapper" style={styles.wrapper}>
-            <div className='table-view-container' style={{ ...styles.container, width: availableWidth }}>
-                <div className='table-view' style={{ ...styles.tableView, height: availableHeight }}>
-                    <div className="table-view-table" style={styles.table}>
-                        <div className="table-view-header" style={{ ...styles.header, left: startColumnX, height: TableView.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
-                            <div className="table-view-row" style={{ ...styles.row, height: '100%' }}>
-                            <TableHeaderCell key={''} content={''} isIndex={true} isLastColumn={false} scrollX={scrollX} width={indexWidth} scrollbarWidth={TableView.scrollbarWidth} />
-                            { columns.map((column, j) => {
-                                const isLastColumn = (j == columns.length - 1)
-                                let width
-                                if (isLastColumn) {
-                                    width = (totalTableWidth < availableWidth) ? (columnWidths[j] + (availableWidth - totalTableWidth) - 8) : columnWidths[j]
-                                } else {
-                                    width = columnWidths[j]
-                                }
-                                return <TableHeaderCell key={column.id} content={column.name} isIndex={false} isLastColumn={isLastColumn} scrollX={scrollX} width={width} scrollbarWidth={TableView.scrollbarWidth} />
-                            }) }</div>
-                        </div>
-                        <div style={{ display: 'flex' }}>
-                            <div className="table-view-index" style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
-                                { rowSlice.rows.map((row, n) => {
+        return <div className='table-view' style={{ ...styles.tableView }}>
+            <div className="table-view-table" style={styles.table}>
+                <div className="table-view-header" style={{ ...styles.header, left: startColumnX, height: TableView.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
+                    <div className="table-view-row" style={{ ...styles.row, height: '100%' }}>
+                    <TableHeaderCell key={''} content={''} isIndex={true} isLastColumn={false} scrollX={scrollX} width={indexWidth} scrollbarWidth={TableView.scrollbarWidth} />
+                    { columns.map((column, j) => {
+                        const isLastColumn = (j == columns.length - 1)
+                        const width = columnWidths[j]
+                        return <TableHeaderCell key={column.id} content={column.name} isIndex={false} isLastColumn={isLastColumn} scrollX={scrollX} width={width} scrollbarWidth={TableView.scrollbarWidth} />
+                    }) }</div>
+                </div>
+                <div style={{ display: 'flex' }}>
+                    <div className="table-view-index" style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
+                        { rowSlice.rows.map((row, n) => {
                                     if (!row) { return <div style={{ height: 32 }}></div> } // TODO
-                                    const rowIndex = rowSlice.startIndex + n
-                                    const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
-                                    const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
-                                    const cellHeight = rowSlice.rowHeights[n]
-                                    const rowHeight = cellHeight + (isLastRow ? 8 : 0)
+                            const rowIndex = rowSlice.startIndex + n
+                            const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
+                            const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
+                            const cellHeight = rowSlice.rowHeights[n]
+                            const rowHeight = cellHeight + (isLastRow ? 8 : 0)
                                     const value = String(row.index)
                                     return <div className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }} key={row.index}>
-                                        <TableCell width={indexWidth} height={cellHeight} value={value} isIndex={true} isLastColumn={false} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
-                                    </div>
-                                })}
+                                <TableCell width={indexWidth} height={cellHeight} value={value} isIndex={true} isLastColumn={false} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
                             </div>
-                            <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY }}>
-                                { rowSlice.rows.map((row, n) => {
-                                    if (!row) { return <div style={{ height: 32 }}></div> } // TODO
-                                    const rowIndex = rowSlice.startIndex + n
-                                    const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
-                                    const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
-                                    const cellHeight = rowSlice.rowHeights[n]
-                                    const rowHeight = rowSlice.rowHeights[n] + (isLastRow ? 8 : 0)
-                                    const background = (rowIndex % 2 == 0) ? '#fcfcfc' : '#ffffff'
+                        })}
+                    </div>
+                    <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY }}>
+                        { rowSlice.rows.map((row, n) => {
+                            const rowIndex = rowSlice.startIndex + n
+                            const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
+                            const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
+                            const cellHeight = rowSlice.rowHeights[n]
+                            const rowHeight = rowSlice.rowHeights[n] + (isLastRow ? 8 : 0)
+                            const background = (rowIndex % 2 == 0) ? '#fcfcfc' : '#ffffff'
 
-                                    let isLoading = false
-                                    if (table.fetchState) {
-                                        const { offset, count } = table.fetchState
-                                        isLoading = (rowIndex >= offset) && (rowIndex < offset + count)
-                                    }
+                            let isLoading = false
+                            if (table.fetchState) {
+                                const { offset, count } = table.fetchState
+                                isLoading = (rowIndex >= offset) && (rowIndex < offset + count)
+                            }
 
-                                    if (isLoading) {
-                                        const width = Math.max(totalTableWidth, availableWidth - indexWidth) + 32 // TODO: Why do we need to add 32?
-                                        return <div className="table-view-row" style={{ ...styles.row, borderBottom, width, height: rowHeight, background }}>
-                                            {/* <ContentLoader viewBox={`0 0 ${width} ${height}`}>
-                                                <rect x="6" y="6" width={width - 12} height={height - 12} />
-                                            </ContentLoader> */}
-                                        </div>
-                                    }
+                            if (isLoading) {
+                                const width = totalTableWidth + 32 // TODO: Min width 100%?
+                                return <div className="table-view-row" style={{ ...styles.row, borderBottom, width, height: rowHeight, background }}>
+                                    {/* <ContentLoader viewBox={`0 0 ${width} ${height}`}>
+                                        <rect x="6" y="6" width={width - 12} height={height - 12} />
+                                    </ContentLoader> */}
+                                </div>
+                            }
 
                                     return <div className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }} key={row.index}>{ columns.map((_column, j) => {
                                         const value = row.values[j]
-                                        const isLastColumn = (j == columns.length - 1)
-                                        let width
-                                        if (isLastColumn) {
-                                            width = (totalTableWidth < availableWidth) ? (columnWidths[j] + (availableWidth - totalTableWidth) - 8) : columnWidths[j]
-                                        } else {
-                                            width = columnWidths[j]
-                                        }
-                                        return <TableCell key={j} width={width} height={cellHeight} value={value} isIndex={false} isLastColumn={isLastColumn} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
-                                    }) }</div>
-                                }) }
-                            </div>
-                        </div>
+                                const width = columnWidths[j]
+                                const isLastColumn = (j == columns.length - 1)
+                                return <TableCell key={j} width={width} height={cellHeight} value={value} isIndex={false} isLastColumn={isLastColumn} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
+                            }) }</div>
+                        }) }
                     </div>
-                    <div className='table-view-scroll-view-container' style={{ ...styles.scrollViewContainer, pointerEvents: 'auto' }}>
-                        <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: TableView.minRowHeight }} onScroll={this.handleScrollChanged}>
-                            <div style={{ width: Math.max(totalBodyWidth, availableWidth - indexWidth), height: totalBodyHeight }}></div>
-                        </div>
-                    </div>
-                    { availableHeight > (totalBodyHeight + 40) ? <div style={{ width: '100%', height: '1px', background: '#e6e6e6', position: 'absolute', left: 0, top: (totalBodyHeight + 40) }} /> : '' }
+                </div>
+            </div>
+            <div className='table-view-scroll-view-container' style={{ ...styles.scrollViewContainer, pointerEvents: 'auto' }}>
+                <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: TableView.minRowHeight }} onScroll={this.handleScrollChanged}>
+                    <div style={{ minWidth: '100%', width: totalBodyWidth, height: totalBodyHeight }}></div>
                 </div>
             </div>
         </div>
@@ -194,21 +176,19 @@ function computeColumnWidth(column: TableColumnVM): number {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-    wrapper: {
+    container: {
         display: 'flex',
-        flexDirection: 'column',
+        overflow: 'hidden',
+    },
+    tableView: {
+        boxSizing: 'border-box',
+        display: 'flex',
+        position: 'relative',
         overflow: 'hidden',
         border: '1px solid #e6e6e6',
         userSelect: 'none',
-    },
-    container: {
-        position: 'relative',
-        display: 'flex'
-    },
-    view: {
-        position: 'relative',
-        overflow: 'hidden',
-        boxSizing: 'border-box',
+        width: '100%',
+        height: '100%',
     },
     scrollViewContainer: {
         display: 'flex',

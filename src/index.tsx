@@ -48,8 +48,8 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
     render() {
         const { style, userProfilePictureStyle, userMessageStyle, assistantMessageStyle, inputStyle, sendButtonStyle } = this.props;
         const { table } = this.state;
-        return <div style={{ display: 'flex', alignItems: 'stretch', gap: '32px' }}>
-            <div style={{ width: '420px', minHeight: '640px' }}>
+        return <div style={{ display: 'flex', alignItems: 'stretch', gap: '32px', width: '100%', height: '100%' }}>
+            <div style={{ width: '420px', minHeight: '640px', flexShrink: 0 }}>
                 <AssistantView
                     ref={this.assistantViewRef}
                     style={style}
@@ -60,7 +60,7 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
                     sendButtonStyle={sendButtonStyle}
                 />
             </div>
-            <div style={{ flexGrow: 1 }}>
+            <div style={{ flexGrow: 1, overflow: 'hidden' }}>
                 { table && <TableView table={table} /> }
             </div>
         </div>
