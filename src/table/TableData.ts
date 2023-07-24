@@ -37,6 +37,7 @@ class TableData {
     columns: TableColumnVM[]
     loadedPages: LoadedPage[]
     totalTableHeight: number
+    fetchDelayTimer: number | null = null
     fetchState: { offset: number, count: number } | null = null
 
     constructor(tableInfo: TableInfo) {
@@ -54,6 +55,8 @@ class TableData {
     }
 
     fetchRowsIfNeeded(range: RowRange) {
+        // Cancel fetch 
+        if (this.fetchDelayTimer) { clearTimeout(this.fetchDelayTimer) }
         // Number of rows to fetch at once. Note actual number of rows fetched can change based on alignment / gap cover.
         const defaultFetchSize = 100
         // Align the starts/end of fetches to multiples of this number.
@@ -109,7 +112,10 @@ class TableData {
                 end += fetchAlignmentMultiple - (end % fetchAlignmentMultiple)
             }
             // Fetch
-            this.fetchRows({ start, end })
+            this.fetchDelayTimer = setTimeout(() => {
+                this.fetchRows({ start, end })
+                this.fetchDelayTimer = null
+            }, 500)
         }
     }
 
@@ -122,7 +128,6 @@ class TableData {
     }
 
     handleFetchedPage(page: TablePage) {
-        console.log('handleFetchedPage', page)
         if (page.table_id != this.tableID) { return }
         // Check fetch state
         const { offset } = this.fetchState ?? {}
@@ -137,7 +142,6 @@ class TableData {
     }
 
     insertPage(page: LoadedPage) {
-        console.log('insertPage', page)
         // Insert page at the correct position
         let index = this.loadedPages.findIndex(x => x.offset > page.offset)
         if (index == -1) { index = this.loadedPages.length }
