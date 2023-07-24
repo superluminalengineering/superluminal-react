@@ -1,10 +1,11 @@
 import React from 'react'
+import ContentLoader from 'react-content-loader';
 
 import TableHeaderCell from './TableHeaderCell'
 import TableCell from './TableCell'
 import MeasureUtilities from '../utilities/MeasureUtilities'
 import ObjectUtilities from '../utilities/ObjectUtilities'
-import TableData, { RowSlice, TableColumnVM } from './TableData'
+import TableData, { RowRange, RowSlice, TableColumnVM } from './TableData'
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController'
 import { TablePage } from '../models/TableInfo'
 
@@ -16,7 +17,7 @@ interface State {
     rowSlice: RowSlice
     scrollX: number
     scrollY: number
-    fetchState: { offset: number, count: number } | null
+    fetchRange: RowRange | null
 }
 
 class TableView extends React.Component<Props, State> implements SessionControllerEventListener {
@@ -31,7 +32,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
             rowSlice: { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] },
             scrollX: 0,
             scrollY: 0,
-            fetchState: props.table.fetchState,
+            fetchRange: props.table.getFetchRange()
         }
         this.scrollViewRef = React.createRef()
         this.handleScrollChanged = this.handleScrollChanged.bind(this)
@@ -50,7 +51,6 @@ class TableView extends React.Component<Props, State> implements SessionControll
         const { table } = this.props
         table.handleFetchedPage(page)
         this.handleScrollChanged()
-        this.setState({ fetchState: table.fetchState })
     }
 
     shouldComponentUpdate(props: Readonly<Props>, state: Readonly<State>): boolean {
@@ -61,15 +61,16 @@ class TableView extends React.Component<Props, State> implements SessionControll
 
     render() {
         const { table } = this.props
-        const { rowSlice, scrollX, scrollY } = this.state
+        const { rowSlice, scrollX, scrollY, fetchRange } = this.state
         const { columns, numberOfRows } = table
         const indexWidth = computeIndexWidth(numberOfRows) // TODO: For filtered views, numberOfRows != maxLabel
         const columnWidths = columns.map(computeColumnWidth)
-        const totalTableWidth = indexWidth + columnWidths.reduce((a, b) => a + b, 0)
         const totalBodyWidth = columnWidths.reduce((a, b) => a + b, 0)
-        const totalBodyHeight = numberOfRows * TableView.minRowHeight
+        const totalBodyHeight = table.totalHeight
         const startColumnX = -scrollX
         const shadow = '0px 0px 4px 0px #e6e6e6'    
+
+        table.onFetchRangeUpdated = (fetchRange) => this.setState({ fetchRange })
 
         return <div className='table-view' style={{ ...styles.tableView }}>
             <div className="table-view-table" style={styles.table}>
@@ -106,22 +107,18 @@ class TableView extends React.Component<Props, State> implements SessionControll
                             const cellHeight = rowSlice.rowHeights[n]
                             const rowHeight = rowSlice.rowHeights[n] + (isLastRow ? 8 : 0)
                             const background = (rowIndex % 2 == 0) ? '#fcfcfc' : '#ffffff'
-
-                            let isLoading = false
-                            if (table.fetchState) {
-                                const { offset, count } = table.fetchState
-                                isLoading = (rowIndex >= offset) && (rowIndex < offset + count)
-                            }
-
-                            if (isLoading) {
-                                const width = totalTableWidth + 32 // TODO: Min width 100%?
-                                return <div className="table-view-row" style={{ ...styles.row, borderBottom, width, height: rowHeight, background }}>
-                                    {/* <ContentLoader viewBox={`0 0 ${width} ${height}`}>
-                                        <rect x="6" y="6" width={width - 12} height={height - 12} />
-                                    </ContentLoader> */}
+                            // Loader
+                            if (fetchRange && rowIndex >= fetchRange.start && rowIndex < fetchRange.end) {
+                                const rowWidth = totalBodyWidth
+                                const innerRowHeight = rowHeight - 1 // -1 for border
+                                const padding = 6
+                                return <div className="table-view-row" style={{ ...styles.row, borderBottom, width: rowWidth, height: rowHeight, background }}>
+                                    <ContentLoader viewBox={`0 0 ${rowWidth} ${innerRowHeight}`}>
+                                        <rect x={padding} y={padding} width={rowWidth - (2 * padding)} height={innerRowHeight - (2 * padding)} />
+                                    </ContentLoader>
                                 </div>
                             }
-
+                            // Regular render
                             return <div className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }} key={key}>{ columns.map((_column, j) => {
                                 const value = row?.values[j] ?? ''
                                 const width = columnWidths[j]
@@ -150,7 +147,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
             const { table } = props
             const rowSlice = table.rowSlice({ minY, maxY }, { fetchIfNeeded: true })
                 ?? { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] }
-            return { rowSlice, scrollX, scrollY, fetchState: table.fetchState }
+            return { rowSlice, scrollX, scrollY }
         })
     }
     // #endregion
