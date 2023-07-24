@@ -34,19 +34,16 @@ class TableView extends React.Component<Props, State> implements SessionControll
             fetchState: props.table.fetchState,
         }
         this.scrollViewRef = React.createRef()
-        this.onResize = this.onResize.bind(this)
         this.handleScrollChanged = this.handleScrollChanged.bind(this)
     }
 
     componentDidMount() {
         SessionController.getInstance().addListener(this);
-        window.addEventListener('resize', this.onResize)
         this.handleScrollChanged()
     }
 
     componentWillUnmount(): void {
         SessionController.getInstance().removeListener(this);
-        window.removeEventListener('resize', this.onResize)
     }
 
     onTablePageReceived(page: TablePage) {
@@ -142,10 +139,6 @@ class TableView extends React.Component<Props, State> implements SessionControll
             </div>
         </div>
     }
-
-    // #region Updating
-    onResize(_: UIEvent) { this.forceUpdate() }
-    // #endregion
 
     // #region Interaction
     handleScrollChanged() {
