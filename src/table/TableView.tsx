@@ -88,14 +88,14 @@ class TableView extends React.Component<Props, State> implements SessionControll
                 <div style={{ display: 'flex' }}>
                     <div className="table-view-index" style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
                         { rowSlice.rows.map((row, n) => {
-                                    if (!row) { return <div style={{ height: 32 }}></div> } // TODO
                             const rowIndex = rowSlice.startIndex + n
+                            const key = row?.index ?? `empty-${rowIndex}`
                             const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                             const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
                             const cellHeight = rowSlice.rowHeights[n]
                             const rowHeight = cellHeight + (isLastRow ? 8 : 0)
-                                    const value = String(row.index)
-                                    return <div className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }} key={row.index}>
+                            const value = row ? String(row.index) : ''
+                            return <div className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }} key={key}>
                                 <TableCell width={indexWidth} height={cellHeight} value={value} isIndex={true} isLastColumn={false} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
                             </div>
                         })}
@@ -103,6 +103,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                     <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY }}>
                         { rowSlice.rows.map((row, n) => {
                             const rowIndex = rowSlice.startIndex + n
+                            const key = row?.index ?? `empty-${rowIndex}`
                             const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                             const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
                             const cellHeight = rowSlice.rowHeights[n]
@@ -124,8 +125,8 @@ class TableView extends React.Component<Props, State> implements SessionControll
                                 </div>
                             }
 
-                                    return <div className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }} key={row.index}>{ columns.map((_column, j) => {
-                                        const value = row.values[j]
+                            return <div className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }} key={key}>{ columns.map((_column, j) => {
+                                const value = row?.values[j] ?? ''
                                 const width = columnWidths[j]
                                 const isLastColumn = (j == columns.length - 1)
                                 return <TableCell key={j} width={width} height={cellHeight} value={value} isIndex={false} isLastColumn={isLastColumn} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
