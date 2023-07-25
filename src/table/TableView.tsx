@@ -3,9 +3,8 @@ import ContentLoader from 'react-content-loader';
 
 import TableHeaderCell from './TableHeaderCell'
 import TableCell from './TableCell'
-import MeasureUtilities from '../utilities/MeasureUtilities'
 import ObjectUtilities from '../utilities/ObjectUtilities'
-import TableData, { RowRange, RowSlice, TableColumnVM } from './TableData'
+import TableData, { MeasureInfo, RowRange, RowSlice } from './TableData'
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController'
 import { TablePage } from '../models/TableInfo'
 
@@ -25,6 +24,15 @@ class TableView extends React.Component<Props, State> implements SessionControll
 
     static scrollbarWidth = 8
     static minRowHeight = 32
+    static measureInfo: MeasureInfo = {
+        fonts: {
+            header: '600 16px system-ui, sans-serif',
+            index: '600 16px system-ui, sans-serif',
+            body: '400 16px system-ui, sans-serif',
+        },
+        totalCellPadding: 2 * 12 + 1, // 2 * padding + border
+        maxColumnWidth: 320
+    }
 
     constructor(props: Props) {
         super(props)
@@ -62,9 +70,8 @@ class TableView extends React.Component<Props, State> implements SessionControll
     render() {
         const { table } = this.props
         const { rowSlice, scrollX, scrollY, fetchRange } = this.state
-        const { columns, numberOfRows } = table
-        const indexWidth = computeIndexWidth(numberOfRows) // TODO: For filtered views, numberOfRows != maxLabel
-        const columnWidths = columns.map(computeColumnWidth)
+        const { columns, indexWidth, numberOfRows } = table
+        const columnWidths = columns.map(x => x.width)
         const totalBodyWidth = columnWidths.reduce((a, b) => a + b, 0)
         const totalBodyHeight = table.totalHeight
         const startColumnX = -scrollX
@@ -92,7 +99,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                             const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
                             const cellHeight = rowSlice.rowHeights[n]
                             const rowHeight = cellHeight + (isLastRow ? 8 : 0)
-                            const value = row ? String(row.index) : ''
+                            const value = row ? String(row.index + 1) : '' // For UI start counting at 1
                             return <div className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }} key={key}>
                                 <TableCell width={indexWidth} height={cellHeight} value={value} isIndex={true} isLastColumn={false} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
                             </div>
@@ -151,19 +158,6 @@ class TableView extends React.Component<Props, State> implements SessionControll
     }
 }
 
-const enWidthRegular = MeasureUtilities.measureRegularText('\u2013', 10).width
-const enWidthSemiBold = MeasureUtilities.measureSemiBoldText('\u2013', 10).width
-
-function computeIndexWidth(rowCount: number): number {
-    const maxIndexLength = String(rowCount).length
-    const enWidth = (enWidthSemiBold * 1.1) // Emperical adjustment
-    return Math.min(enWidth * maxIndexLength + 32, 512)
-}
-
-function computeColumnWidth(column: TableColumnVM): number {
-    return Math.min(enWidthRegular * column.maxValueLength + 32, 512)
-}
-
 const styles: Record<string, React.CSSProperties> = {
     container: {
         display: 'flex',
@@ -203,16 +197,18 @@ const styles: Record<string, React.CSSProperties> = {
         backgroundColor: '#fafafa',
         textAlign: 'center',
         transform: 'translate3d(0, 0, 1px)',
-        fontWeight: 600
+        font: TableView.measureInfo.fonts.header,
     },
     index: {
         position: 'relative',
         zIndex: 1,
         background: '#fafafa',
+        font: TableView.measureInfo.fonts.index,
     },
     body: {
         position: 'relative',
         zIndex: 0,
+        font: TableView.measureInfo.fonts.body,
     },
     row: {
         boxSizing: 'border-box',

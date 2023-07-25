@@ -41,7 +41,7 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
     }
 
     onTableUpdated(table: TableInfo) {
-        const tableData = new TableData(table);
+        const tableData = new TableData(table, TableView.measureInfo);
         this.setState({ table: tableData })
     }
 

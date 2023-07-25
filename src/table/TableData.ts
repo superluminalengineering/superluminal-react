@@ -7,23 +7,33 @@ const fetchDelay = 500 // ms
 class TableData {
     tableID: string
     numberOfRows: number
-    columns: TableColumnVM[]
+    indexWidth: number
+    columns: TableColumn[]
     totalHeight: number
     private loadedPages: LoadedPage[]
     private fetchState: FetchState = { state: 'idle' }
     onFetchRangeUpdated?: (range: RowRange | null) => void
+    private measureInfo: MeasureInfo
 
-    constructor(tableInfo: TableInfo) {
+    constructor(tableInfo: TableInfo, measureInfo: MeasureInfo) {
         this.tableID = tableInfo.table_id
         this.numberOfRows = tableInfo.row_count
-        this.columns = tableInfo.columns.map((column) => ({ id: column.label, name: column.label, maxValueLength: 16 }))
         this.totalHeight = this.numberOfRows * minimumRowHeight
+        this.measureInfo = measureInfo
+        this.indexWidth = 0 // Updated later
+        // Measure columns
+        this.columns = tableInfo.columns.map((column) => {
+            let width = measureTextWidth(column.label, measureInfo.fonts.header) + measureInfo.totalCellPadding
+            if (width > measureInfo.maxColumnWidth) { width = measureInfo.maxColumnWidth }
+            return { id: column.label, name: column.label, width: width }
+        })
         // First page
         const { offset, row_count: rowCount, rows } = tableInfo.first_page
         const rowHeights = Array(rowCount).fill(minimumRowHeight)
         const pageHeight = rowCount * minimumRowHeight
         const firstPage: LoadedPage = { loaded: true, offset, rowCount, rows, rowHeights, pageHeight }
         this.loadedPages = [ firstPage ]
+        this.updateMeasurements(firstPage)
     }
 
     // General
@@ -203,7 +213,40 @@ class TableData {
             }
             break
         }
-        // TODO: Update row heights & max value lengths
+        this.updateMeasurements(page)
+    }
+
+    private updateMeasurements(page: LoadedPage) {
+        const { fonts, totalCellPadding, maxColumnWidth } = this.measureInfo
+        const maxTextWidth = (maxColumnWidth - totalCellPadding)
+        // Go through all rows and measure them
+        let maxIndex = this.numberOfRows-1 // We know index gets at least this high
+        for (let i = 0; i < page.rows.length; i++) {
+            const row = page.rows[i]
+            if (row.index > maxIndex) { maxIndex = row.index }
+            for (let j = 0; j < row.values.length; j++) {
+                const value = row.values[j]
+                const column = this.columns[j]
+                let { width, height } = measureWrappedTextBounds(value, fonts.body, maxTextWidth)
+                width += totalCellPadding
+                // Update column width
+                if (width > column.width) {
+                    column.width = width
+                }
+                // Update row height
+                if (height > page.rowHeights[i]) {
+                    const delta = (height - page.rowHeights[i])
+                    page.rowHeights[i] = height
+                    page.pageHeight += delta
+                    this.totalHeight += delta
+                }
+            }
+        }
+        // Update index width
+        // When measuring, replace all digits by 0 as it is the widest character
+        const maxDisplayIndex = String(maxIndex + 1) // In UI we start counting at 1
+        const indexWidth = measureTextWidth(maxDisplayIndex.replace(/./g, '0'), fonts.index) + totalCellPadding
+        if (indexWidth > this.indexWidth) { this.indexWidth = indexWidth }
     }
 
     // Convenience methods
@@ -283,6 +326,34 @@ class TableData {
     }
 }
 
+// Measure
+
+export type MeasureInfo = {
+    fonts: { header: string, index: string, body: string },
+    totalCellPadding: number,
+    maxColumnWidth: number
+}
+
+const canvas = document.createElement('canvas')
+const context = canvas.getContext('2d')!
+
+function measureTextWidth(text: string, font: string): number {
+    if (context.font != font) {
+        context.font = font
+    }
+    return context.measureText(text).width
+}
+
+function measureWrappedTextBounds(text: string, font: string, maxWidth: number): { width: number, height: number } {
+    if (context.font != font) { context.font = font }
+    const width = context.measureText(text).width
+    // Single line
+    if (width <= maxWidth) {
+        return { width: width, height: minimumRowHeight }
+    }
+    return { width: maxWidth, height: minimumRowHeight * Math.ceil(width / maxWidth) }
+}
+
 // Public types
 
 export type RowRange = { start: number, end: number }
@@ -295,10 +366,10 @@ export type RowSlice = {
     rowHeights: number[]
 }
 
-export type TableColumnVM = {
+export type TableColumn = {
     id: string
     name: string
-    maxValueLength: number
+    width: number
 }
 
 // Private types
