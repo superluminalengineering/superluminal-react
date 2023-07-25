@@ -137,7 +137,6 @@ class TableView extends React.Component<Props, State> implements SessionControll
         </div>
     }
 
-    // #region Interaction
     handleScrollChanged() {
         const scrollX = this.scrollViewRef.current?.scrollLeft ?? 0
         const scrollY = this.scrollViewRef.current?.scrollTop ?? 0
@@ -150,7 +149,6 @@ class TableView extends React.Component<Props, State> implements SessionControll
             return { rowSlice, scrollX, scrollY }
         })
     }
-    // #endregion
 }
 
 const enWidthRegular = MeasureUtilities.measureRegularText('\u2013', 10).width

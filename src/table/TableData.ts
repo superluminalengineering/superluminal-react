@@ -1,37 +1,6 @@
 import SessionController from "../controllers/SessionController"
 import { TableInfo, TablePage, TableRow } from "../models/TableInfo"
 
-type LoadedPage = {
-    loaded: true
-    offset: number
-    rowCount: number
-    rows: TableRow[]
-    rowHeights: number[]
-    pageHeight: number
-}
-
-type UnloadedTablePage = {
-    loaded: false
-    offset: number
-    rowCount: number
-    pageHeight: number
-}
-type Page = LoadedPage | UnloadedTablePage
-
-export type RowSlice = {
-    startIndex: number
-    startY: number
-    endY: number
-    rows: (TableRow | null)[]
-    rowHeights: number[]
-}
-
-export type RowRange = { start: number, end: number }
-type FetchState =
-    { state: 'idle', range?: undefined, timeout?: undefined } |
-    { state: 'scheduled', range: RowRange, timeout: number } |
-    { state: 'fetching', range: RowRange, timeout?: undefined }
-
 const minimumRowHeight = 32
 const fetchDelay = 500 // ms
 
@@ -55,8 +24,34 @@ class TableData {
         const pageHeight = rowCount * minimumRowHeight
         const firstPage: LoadedPage = { loaded: true, offset, rowCount, rows, rowHeights, pageHeight }
         this.loadedPages = [ firstPage ]
-        // TODO: Update row heights & max value lengths
     }
+
+    // General
+
+    rowSlice(range: { minY: number, maxY: number }, options?: { fetchIfNeeded?: boolean }): RowSlice | null {
+        const fetchIfNeeded = options?.fetchIfNeeded ?? false
+        const startRow = (range.minY >= 0) ? this.rowIndexAtY(range.minY) : 0
+        if (startRow === null) { return null }
+        // Collect rows
+        let [ startIndex, startY, endY ] = [ 0, 0, 0 ]
+        let rows: (TableRow | null)[] = []
+        let rowHeights: number[] = []
+        this.iterateRows(startRow, (row, index, y, height) => {
+            if (y > range.maxY) { return 'stop' }
+            if (rows.length === 0) { [startIndex, startY] = [index, y] }
+            endY = y + height
+            rows.push(row)
+            rowHeights.push(height)
+        })
+        if (rows.length === 0) { return null }
+        // Start a fetch if needed
+        if (fetchIfNeeded) {
+            this.fetchRowsIfNeeded({ start: startIndex, end: startIndex + rows.length })
+        }
+        return { startIndex, startY, endY, rows, rowHeights }
+    }
+
+    // Fetching
 
     fetchRowsIfNeeded(visibleRange: RowRange) {
         // See if there is something to fetch
@@ -144,11 +139,6 @@ class TableData {
         this.onFetchRangeUpdated?.(range)
     }
 
-    getFetchRange(): RowRange | null {
-        if (this.fetchState.state !== 'fetching') { return null }
-        return this.fetchState.range
-    }
-
     handleFetchedPage(page: TablePage) {
         if (page.table_id != this.tableID) { return }
         // Check current fetch state still relates to same range
@@ -168,6 +158,13 @@ class TableData {
             this.onFetchRangeUpdated?.(null)
         }
     }
+
+    getFetchRange(): RowRange | null {
+        if (this.fetchState.state !== 'fetching') { return null }
+        return this.fetchState.range
+    }
+
+    // Updating
 
     private insertPage(page: LoadedPage) {
         // Insert page at the correct position
@@ -209,28 +206,7 @@ class TableData {
         // TODO: Update row heights & max value lengths
     }
 
-    rowSlice(range: { minY: number, maxY: number }, options?: { fetchIfNeeded?: boolean }): RowSlice | null {
-        const fetchIfNeeded = options?.fetchIfNeeded ?? false
-        const startRow = (range.minY >= 0) ? this.rowIndexAtY(range.minY) : 0
-        if (startRow === null) { return null }
-        // Collect rows
-        let [ startIndex, startY, endY ] = [ 0, 0, 0 ]
-        let rows: (TableRow | null)[] = []
-        let rowHeights: number[] = []
-        this.iterateRows(startRow, (row, index, y, height) => {
-            if (y > range.maxY) { return 'stop' }
-            if (rows.length === 0) { [startIndex, startY] = [index, y] }
-            endY = y + height
-            rows.push(row)
-            rowHeights.push(height)
-        })
-        if (rows.length === 0) { return null }
-        // Start a fetch if needed
-        if (fetchIfNeeded) {
-            this.fetchRowsIfNeeded({ start: startIndex, end: startIndex + rows.length })
-        }
-        return { startIndex, startY, endY, rows, rowHeights }
-    }
+    // Convenience methods
 
     private rowIndexAtY(y: number): number | null {
         const pageResult = this.findPage((page, pageY) => y >= pageY && y < pageY + page.pageHeight)
@@ -307,10 +283,47 @@ class TableData {
     }
 }
 
+// Public types
+
+export type RowRange = { start: number, end: number }
+
+export type RowSlice = {
+    startIndex: number
+    startY: number
+    endY: number
+    rows: (TableRow | null)[]
+    rowHeights: number[]
+}
+
 export type TableColumnVM = {
     id: string
     name: string
     maxValueLength: number
 }
+
+// Private types
+
+type LoadedPage = {
+    loaded: true
+    offset: number
+    rowCount: number
+    rows: TableRow[]
+    rowHeights: number[]
+    pageHeight: number
+}
+
+type UnloadedTablePage = {
+    loaded: false
+    offset: number
+    rowCount: number
+    pageHeight: number
+}
+
+type Page = LoadedPage | UnloadedTablePage
+
+type FetchState =
+    { state: 'idle', range?: undefined, timeout?: undefined } |
+    { state: 'scheduled', range: RowRange, timeout: number } |
+    { state: 'fetching', range: RowRange, timeout?: undefined }
 
 export default TableData
