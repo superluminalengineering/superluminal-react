@@ -21,7 +21,7 @@ class TableCell extends React.Component<Props, State> {
         const borderRight = isLastColumn ? 'none' : '1px solid #e6e6e6'
         const fontWeight = isIndex ? 600 : 'regular'
         const paddingRight = 12 + (isLastColumn ? scrollbarWidth : 0)
-        const paddingBottom = isLastRow ? scrollbarWidth : 0
+        const paddingBottom = 6 + (isLastRow ? scrollbarWidth : 0)
         return <div className="table-view-cell"
             style={{ ...styles.cell, fontWeight, width, height, paddingRight, paddingBottom, borderRight }}>
             {value}
@@ -36,9 +36,11 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         justifyContent: 'center',
         boxSizing: 'border-box',
-        padding: '0px 12px',
+        padding: '6px 12px',
         textAlign: 'center',
         overflow: 'hidden',
+        overflowWrap: 'anywhere',
+        whiteSpace: 'pre-wrap',
         color: '#121212'
     }
 }

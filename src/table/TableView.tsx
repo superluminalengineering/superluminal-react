@@ -30,7 +30,11 @@ class TableView extends React.Component<Props, State> implements SessionControll
             index: '600 16px system-ui, sans-serif',
             body: '400 16px system-ui, sans-serif',
         },
-        totalCellPadding: 2 * 12 + 1, // 2 * padding + border
+        totalCellPadding: {
+            x: (2 * 12 + 1), // 2 * padding + border
+            y: (2 * 6 + 1)
+        },
+        lineHeight: 19,
         maxColumnWidth: 320
     }
 
@@ -111,7 +115,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                             const key = row?.index ?? `empty-${rowIndex}`
                             const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                             const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
-                            const cellHeight = rowSlice.rowHeights[n]
+                            const cellHeight = rowSlice.rowHeights[n] - 1 // -1 for border
                             const rowHeight = rowSlice.rowHeights[n] + (isLastRow ? 8 : 0)
                             const background = (rowIndex % 2 == 0) ? '#fcfcfc' : '#ffffff'
                             // Loader

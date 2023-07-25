@@ -23,7 +23,7 @@ class TableData {
         this.indexWidth = 0 // Updated later
         // Measure columns
         this.columns = tableInfo.columns.map((column) => {
-            let width = measureTextWidth(column.label, measureInfo.fonts.header) + measureInfo.totalCellPadding
+            let width = measureTextWidth(column.label, measureInfo.fonts.header) + measureInfo.totalCellPadding.x
             if (width > measureInfo.maxColumnWidth) { width = measureInfo.maxColumnWidth }
             return { id: column.label, name: column.label, width: width }
         })
@@ -217,18 +217,19 @@ class TableData {
     }
 
     private updateMeasurements(page: LoadedPage) {
-        const { fonts, totalCellPadding, maxColumnWidth } = this.measureInfo
-        const maxTextWidth = (maxColumnWidth - totalCellPadding)
+        const { fonts, totalCellPadding, lineHeight, maxColumnWidth } = this.measureInfo
+        const maxTextWidth = (maxColumnWidth - totalCellPadding.x)
         // Go through all rows and measure them
-        let maxIndex = this.numberOfRows-1 // We know index gets at least this high
-        for (let i = 0; i < page.rows.length; i++) {
+        let maxIndex = this.numberOfRows - 1 // We know index gets at least this high
+        for (let i = 0; i < page.rows.length; i += 1) {
             const row = page.rows[i]
             if (row.index > maxIndex) { maxIndex = row.index }
-            for (let j = 0; j < row.values.length; j++) {
+            for (let j = 0; j < row.values.length; j += 1) {
                 const value = row.values[j]
                 const column = this.columns[j]
-                let { width, height } = measureWrappedTextBounds(value, fonts.body, maxTextWidth)
-                width += totalCellPadding
+                let { width, height } = measureWrappedTextBounds(value, fonts.body, lineHeight, maxTextWidth)
+                width += totalCellPadding.x
+                height += totalCellPadding.y
                 // Update column width
                 if (width > column.width) {
                     column.width = width
@@ -243,10 +244,11 @@ class TableData {
             }
         }
         // Update index width
-        // When measuring, replace all digits by 0 as it is the widest character
         const maxDisplayIndex = String(maxIndex + 1) // In UI we start counting at 1
-        const indexWidth = measureTextWidth(maxDisplayIndex.replace(/./g, '0'), fonts.index) + totalCellPadding
-        if (indexWidth > this.indexWidth) { this.indexWidth = indexWidth }
+        for (let i = 0; i <= 9; i += 1) { // Try all digits to see which is widest
+            const indexWidth = measureTextWidth(maxDisplayIndex.replace(/./g, String(i)), fonts.index) + totalCellPadding.x
+            if (indexWidth > this.indexWidth) { this.indexWidth = indexWidth }
+        }
     }
 
     // Convenience methods
@@ -330,12 +332,14 @@ class TableData {
 
 export type MeasureInfo = {
     fonts: { header: string, index: string, body: string },
-    totalCellPadding: number,
+    totalCellPadding: { x: number, y: number },
+    lineHeight: number,
     maxColumnWidth: number
 }
 
 const canvas = document.createElement('canvas')
 const context = canvas.getContext('2d')!
+const textMeasurementDiv = document.createElement('div')
 
 function measureTextWidth(text: string, font: string): number {
     if (context.font != font) {
@@ -344,14 +348,21 @@ function measureTextWidth(text: string, font: string): number {
     return context.measureText(text).width
 }
 
-function measureWrappedTextBounds(text: string, font: string, maxWidth: number): { width: number, height: number } {
-    if (context.font != font) { context.font = font }
-    const width = context.measureText(text).width
+function measureWrappedTextBounds(text: string, font: string, lineHeight: number, maxWidth: number): { width: number, height: number } {
+    const totalWidth = measureTextWidth(text, font)
     // Single line
-    if (width <= maxWidth) {
-        return { width: width, height: minimumRowHeight }
+    if (totalWidth <= maxWidth) {
+        return { width: totalWidth, height: lineHeight }
     }
-    return { width: maxWidth, height: minimumRowHeight * Math.ceil(width / maxWidth) }
+    // Multiple lines
+    textMeasurementDiv.style.width = `${maxWidth}px`
+    textMeasurementDiv.style.font = font
+    textMeasurementDiv.style.lineHeight = `${lineHeight}px`
+    document.body.appendChild(textMeasurementDiv)
+    textMeasurementDiv.textContent = text
+    const height = textMeasurementDiv.offsetHeight
+    document.body.removeChild(textMeasurementDiv)
+    return { width: maxWidth, height: height }
 }
 
 // Public types
