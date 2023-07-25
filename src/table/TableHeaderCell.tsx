@@ -27,7 +27,7 @@ class TableHeaderCell extends React.Component<Props, State> {
             return <div
                 className="table-view-header-cell"
                 style={{ ...styles.headerCell, width: width, borderRight }}>
-                <span>{ content }</span>
+                <span style={styles.inner}>{ content }</span>
             </div>
         }
     }
@@ -40,12 +40,14 @@ const styles: Record<string, React.CSSProperties> = {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
         padding: '0px 12px 0px 12px',
-        textAlign: 'center',
+        backgroundColor: '#fafafa',
+    },
+    inner: {
+        width: '100%',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        backgroundColor: '#fafafa',
+        whiteSpace: 'nowrap'
     }
 }
 
