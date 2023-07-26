@@ -13,9 +13,11 @@ interface Props {
 }
 
 interface State {
+    tableID: string
     rowSlice: RowSlice
     scrollX: number
     scrollY: number
+    scrollViewHeight: number
     fetchRange: RowRange | null
 }
 
@@ -41,9 +43,11 @@ class TableView extends React.Component<Props, State> implements SessionControll
     constructor(props: Props) {
         super(props)
         this.state = {
+            tableID: props.table.tableID,
             rowSlice: { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] },
             scrollX: 0,
             scrollY: 0,
+            scrollViewHeight: 0,
             fetchRange: props.table.getFetchRange()
         }
         this.scrollViewRef = React.createRef()
@@ -51,12 +55,12 @@ class TableView extends React.Component<Props, State> implements SessionControll
     }
 
     componentDidMount() {
-        SessionController.getInstance().addListener(this);
+        SessionController.getInstance().addListener(this)
         this.handleScrollChanged()
     }
 
     componentWillUnmount(): void {
-        SessionController.getInstance().removeListener(this);
+        SessionController.getInstance().removeListener(this)
     }
 
     onTablePageReceived(page: TablePage) {
@@ -69,6 +73,17 @@ class TableView extends React.Component<Props, State> implements SessionControll
         const { table: oldTable, ...oldProps } = this.props
         const { table: newTable, ...newProps } = props
         return oldTable !== newTable || !ObjectUtilities.isEqual(oldProps, newProps) || !ObjectUtilities.isEqual(this, state)
+    }
+
+    static getDerivedStateFromProps(props: Readonly<Props>, state: Readonly<State>): Partial<State> | null {
+        const tableID = props.table.tableID
+        if (tableID !== state.tableID) { // Handle table change
+            const [ minY, maxY ] = [ state.scrollY, state.scrollY + state.scrollViewHeight ]
+            const rowSlice = props.table.rowSlice({ minY, maxY }, { fetchIfNeeded: true })
+                ?? { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] }
+            return { tableID, rowSlice }
+        }
+        return null
     }
 
     render() {
@@ -98,7 +113,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                     <div className="table-view-index" style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
                         { rowSlice.rows.map((row, n) => {
                             const rowIndex = rowSlice.startIndex + n
-                            const key = row?.index ?? `empty-${rowIndex}`
+                            const key = row?.index ?? `empty-${n}`
                             const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                             const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
                             const cellHeight = rowSlice.rowHeights[n]
@@ -112,7 +127,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                     <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY }}>
                         { rowSlice.rows.map((row, n) => {
                             const rowIndex = rowSlice.startIndex + n
-                            const key = row?.index ?? `empty-${rowIndex}`
+                            const key = row?.index ?? `empty-${n}`
                             const isLastRow = (rowIndex == numberOfRows - 1) // numberOfRows counts the header as a row
                             const borderBottom = !isLastRow ? '1px solid #e6e6e6' : 'none'
                             const cellHeight = rowSlice.rowHeights[n] - 1 // -1 for border
@@ -151,13 +166,12 @@ class TableView extends React.Component<Props, State> implements SessionControll
     handleScrollChanged() {
         const scrollX = this.scrollViewRef.current?.scrollLeft ?? 0
         const scrollY = this.scrollViewRef.current?.scrollTop ?? 0
-        const viewHeight = this.scrollViewRef.current?.clientHeight ?? 0
-        const [ minY, maxY ] = [ scrollY, scrollY + viewHeight ]
-        this.setState((state, props) => {
-            const { table } = props
-            const rowSlice = table.rowSlice({ minY, maxY }, { fetchIfNeeded: true })
+        const scrollViewHeight = this.scrollViewRef.current?.clientHeight ?? 0
+        const [ minY, maxY ] = [ scrollY, scrollY + scrollViewHeight ]
+        this.setState((_state, props) => {
+            const rowSlice = props.table.rowSlice({ minY, maxY }, { fetchIfNeeded: true })
                 ?? { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] }
-            return { rowSlice, scrollX, scrollY }
+            return { rowSlice, scrollX, scrollY, scrollViewHeight }
         })
     }
 }
