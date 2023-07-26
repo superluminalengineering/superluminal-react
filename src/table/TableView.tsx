@@ -81,7 +81,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
             const [ minY, maxY ] = [ state.scrollY, state.scrollY + state.scrollViewHeight ]
             const rowSlice = props.table.rowSlice({ minY, maxY }, { fetchIfNeeded: true })
                 ?? { startIndex: 0, startY: 0, endY: 0, rows: [], rowHeights: [] }
-            return { tableID, rowSlice }
+            return { scrollX: 0, scrollY: 0, tableID, rowSlice, fetchRange: null }
         }
         return null
     }
@@ -94,7 +94,14 @@ class TableView extends React.Component<Props, State> implements SessionControll
         const totalBodyWidth = columnWidths.reduce((a, b) => a + b, 0)
         const totalBodyHeight = table.totalHeight
         const startColumnX = -scrollX
-        const shadow = '0px 0px 4px 0px #e6e6e6'    
+        const shadow = '0px 0px 4px 0px #e6e6e6'
+
+        // Reset scroll position on table change
+        const scrollView = this.scrollViewRef.current
+        if (scrollView && scrollX == 0 && scrollY == 0 && (scrollView.scrollLeft > 0 || scrollView.scrollTop > 0)) {
+            scrollView.scrollLeft = 0
+            scrollView.scrollTop = 0
+        }
 
         table.onFetchRangeUpdated = (fetchRange) => this.setState({ fetchRange })
 
