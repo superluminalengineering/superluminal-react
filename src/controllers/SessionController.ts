@@ -50,7 +50,11 @@ class SessionController implements SLWebSocketEventListener {
 
     initialize(user: { id: string, name: string }) {
         this.user = user;
-        Server.getSession()
+        if (!this.authToken) {
+            console.log("Couldn't get session due to missing auth token.")
+            return
+        }
+        Server.getSession(this.authToken)
             .then((response) => {
                 this.sessionState = response.session_state;
                 this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(response.session_state));

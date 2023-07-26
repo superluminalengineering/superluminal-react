@@ -7,11 +7,7 @@ class Server {
 
     static baseURL = "https://app.getluminal.com";
 
-    static getSession(): Promise<{ session_state: SessionState, chat_history: ChatMessage[] }> {
-        const authToken = SessionController.getInstance().authToken;
-        if (!authToken) {
-            return Promise.reject("Couldn't get session due to missing auth token.");
-        }
+    static getSession(authToken: string): Promise<{ session_state: SessionState, chat_history: ChatMessage[] }> {
         return fetch(`${Server.baseURL}/session`, {
             method: "GET",
             headers: {

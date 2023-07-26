@@ -29,7 +29,7 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
         super(props);
         this.state = { table: null };
         if (!props.authToken) {
-            console.log('You must provide a valid Superluminal API key.');
+            console.log('You must provide a valid Superluminal auth token.');
         }
         SessionController.getInstance().authToken = props.authToken;
     }
