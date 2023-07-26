@@ -91,7 +91,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                         switch (message.sender) {
                         case 'user':
                             if ('text' in message.content) {
-                                return <div style={{ ...styles.messageContainer, background: '#00000004' }}>
+                                return <div key={message.id} style={{ ...styles.messageContainer, background: '#00000004' }}>
                                     <ProfilePictureView userName={user.name} style={combinedUserProfilePictureStyle} />
                                     <div style={{ ...styles.userMessage, ...userMessageStyle }}>{message.content.text}</div>
                                 </div>
@@ -100,7 +100,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                             }
                         case 'assistant':
                             if ('text' in message.content) {
-                                return <div style={styles.messageContainer}>
+                                return <div key={message.id} style={styles.messageContainer}>
                                     <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
                                     <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
                                 </div>
@@ -111,7 +111,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                                 const width = (this.chatMessagesContainerRef.current?.offsetWidth ?? 320) - 2 * 20;
                                 const height = ((plot.layout.width * width) / plot.layout.height);
                                 const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
-                                return <div style={styles.messageContainer}>
+                                return <div key={message.id} style={styles.messageContainer}>
                                     <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
                                     <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
                                         <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
