@@ -51,12 +51,12 @@ class TableView extends React.Component<Props, State> implements SessionControll
             fetchRange: props.table.getFetchRange()
         }
         this.scrollViewRef = React.createRef()
-        this.handleScrollChanged = this.handleScrollChanged.bind(this)
+        this.handleScrollViewportChanged = this.handleScrollViewportChanged.bind(this)
     }
 
     componentDidMount() {
         SessionController.getInstance().addListener(this)
-        this.handleScrollChanged()
+        this.handleScrollViewportChanged()
     }
 
     componentWillUnmount(): void {
@@ -66,7 +66,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
     onTablePageReceived(page: TablePage) {
         const { table } = this.props
         table.handleFetchedPage(page)
-        this.handleScrollChanged()
+        this.handleScrollViewportChanged()
     }
 
     shouldComponentUpdate(props: Readonly<Props>, state: Readonly<State>): boolean {
@@ -131,7 +131,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                             </div>
                         })}
                     </div>
-                    <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY }}>
+                    <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY, height: totalBodyHeight }}>
                         { rowSlice.rows.map((row, n) => {
                             const rowIndex = rowSlice.startIndex + n
                             const key = row?.index ?? `empty-${n}`
@@ -163,14 +163,14 @@ class TableView extends React.Component<Props, State> implements SessionControll
                 </div>
             </div>
             <div className='table-view-scroll-view-container' style={{ ...styles.scrollViewContainer, pointerEvents: 'auto' }}>
-                <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: TableView.minRowHeight }} onScroll={this.handleScrollChanged}>
+                <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: TableView.minRowHeight }} onScroll={this.handleScrollViewportChanged} onResize={this.handleScrollViewportChanged}>
                     <div style={{ minWidth: '100%', width: totalBodyWidth, height: totalBodyHeight }}></div>
                 </div>
             </div>
         </div>
     }
 
-    handleScrollChanged() {
+    handleScrollViewportChanged() {
         const scrollX = this.scrollViewRef.current?.scrollLeft ?? 0
         const scrollY = this.scrollViewRef.current?.scrollTop ?? 0
         const scrollViewHeight = this.scrollViewRef.current?.clientHeight ?? 0
