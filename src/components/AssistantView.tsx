@@ -74,10 +74,10 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     }
 
     getWatermarkView(): any {
-        return <div style={styles.watermark}>
+        return <a style={styles.watermark} href='https://www.getluminal.com' target='_blank'>
             <span style={{ opacity: 0.4, fontSize: '11px' }}>Powered by</span>
             <img src={LogoText} height="14px" style={{ opacity: 0.4, marginTop: '1px' }} />
-        </div>
+        </a>
     }
 
     getChatMessagesView(): any {
@@ -191,6 +191,9 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         columnGap: '8px',
+        userSelect: 'none',
+        color: 'black',
+        textDecoration: 'none',
     } as React.CSSProperties,
 
     chatScrollView: {
