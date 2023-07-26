@@ -10,6 +10,7 @@ import { TablePage } from '../models/TableInfo'
 
 interface Props {
     table: TableData
+    style?: React.CSSProperties
 }
 
 interface State {
@@ -89,7 +90,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
     }
 
     render() {
-        const { table } = this.props
+        const { table, style: tableStyle } = this.props
         const { rowSlice, scrollX, scrollY, fetchRange } = this.state
         const { columns, indexWidth, numberOfRows } = table
         const columnWidths = columns.map(x => x.width)
@@ -107,7 +108,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
 
         table.onFetchRangeUpdated = (fetchRange) => this.setState({ fetchRange })
 
-        return <div className='table-view' style={{ ...styles.tableView }}>
+        return <div className='table-view' style={{ ...styles.tableView, ...tableStyle }}>
             <div className="table-view-table" style={styles.table}>
                 <div className="table-view-header" style={{ ...styles.header, left: startColumnX, height: this.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
                     <div className="table-view-row" style={{ ...styles.row, height: '100%' }}>
@@ -187,6 +188,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
 
 const styles: Record<string, React.CSSProperties> = {
     tableView: {
+        backgroundColor: 'white',
         boxSizing: 'border-box',
         display: 'flex',
         position: 'relative',

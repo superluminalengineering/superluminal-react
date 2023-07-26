@@ -1,16 +1,21 @@
 import Plot from 'react-plotly.js';
 import React from 'react'
+import ReactDOM from 'react-dom';
 
 import InlineInput from './InlineInput';
 import ProfilePictureView from './ProfilePictureView';
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController';
+import { TableInfo } from '../models/TableInfo';
+import TablePreview from '../table/TablePreview';
 
 import { ChatMessage } from '../models/ChatMessage';
 import { SessionState } from '../models/SessionState';
 
+import IconExpand from '../images/icon_expand.svg'
 import LogoInverted from '../images/logo_inverted.svg'
 import LogoText from '../images/logo_text.svg'
-import TablePreview from '../table/TablePreview';
+import TableView from '../table/TableView';
+import TableData from '../table/TableData';
 
 interface Props {
     style?: React.CSSProperties
@@ -26,6 +31,7 @@ interface State {
     sessionState: SessionState
     chatMessages: ChatMessage[]
     isProcessing: boolean
+    modalContent: TableData | null
 }
 
 class AssistantView extends React.Component<Props, State> implements SessionControllerEventListener {
@@ -41,6 +47,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
             sessionState: SessionController.getInstance().sessionState,
             chatMessages: SessionController.getInstance().chatMessages,
             isProcessing: false,
+            modalContent: null
         };
         this.sendChatMessage = this.sendChatMessage.bind(this);
         this.onSessionStateUpdated = this.onSessionStateUpdated.bind(this);
@@ -83,7 +90,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     getChatMessagesView(): any {
         const { userProfilePictureStyle, userMessageStyle, assistantMessageStyle } = this.props;
-        const { user, sessionState, chatMessages } = this.state;
+        const { user, sessionState, chatMessages, modalContent } = this.state;
         const combinedUserProfilePictureStyle = { ...{ width: '24px', height: '24px', fontSize: '10px' }, ...userProfilePictureStyle };
         if (user && sessionState == 'ready') {
             return <div ref={this.scrollViewRef} style={styles.chatScrollView}>
@@ -123,7 +130,10 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                             } else if ('table' in message.content) {
                                 const table = message.content.table;
                                 return <div key={message.id} style={styles.messageContainer}>
-                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                        <img src={IconExpand} width="20px" height="20px" onClick={() => this.expandTable(table)} />
+                                    </div>
                                     <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
                                         <TablePreview table={table} />
                                     </div>
@@ -134,6 +144,14 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                         }
                     }) }
                 </div>
+                {modalContent && ReactDOM.createPortal(
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 10000, boxSizing: 'border-box', padding: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => this.setState({ modalContent: null })}>
+                        <div style={{ maxWidth: '100%', maxHeight: '100%' }}>
+                            <TableView table={modalContent} style={{ maxHeight: 'calc(100vh - 64px)' }} />
+                        </div>
+                    </div>,
+                    document.body
+                )}
             </div>
         } else {
             return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
@@ -160,6 +178,10 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         if (!message || message.length == 0 || isProcessing) { return; }
         this.inputRef.current?.clear();
         SessionController.getInstance().sendChatMessage(message);
+    }
+
+    expandTable(table: TableInfo) {
+        this.setState({ modalContent: new TableData(table, TableView.measureInfo) });
     }
 
     setUser(user: { id: string, name: string }) {
