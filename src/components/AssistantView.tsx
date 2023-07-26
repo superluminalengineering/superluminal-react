@@ -10,6 +10,7 @@ import { SessionState } from '../models/SessionState';
 
 import LogoInverted from '../images/logo_inverted.svg'
 import LogoText from '../images/logo_text.svg'
+import TablePreview from '../table/TablePreview';
 
 interface Props {
     style?: React.CSSProperties
@@ -104,7 +105,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                                     <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
                                     <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
                                 </div>
-                            } else {
+                            } else if ('plot' in message.content) {
                                 const plot = JSON.parse(message.content.plot);
                                 // `offsetWidth` should always be set at this point. `320` is an arbitrary reasonable fallback.
                                 // The padding is currently fixed at 20 px on each side.
@@ -119,6 +120,16 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                                         </div>
                                     </div>
                                 </div>
+                            } else if ('table' in message.content) {
+                                const table = message.content.table;
+                                return <div key={message.id} style={styles.messageContainer}>
+                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                    <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
+                                        <TablePreview table={table} />
+                                    </div>
+                                </div>
+                            } else {
+                                return ''
                             }
                         }
                     }) }
@@ -194,6 +205,7 @@ const styles = {
         userSelect: 'none',
         color: 'black',
         textDecoration: 'none',
+        zIndex: 1,
     } as React.CSSProperties,
 
     chatScrollView: {

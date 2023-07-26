@@ -1,7 +1,6 @@
 import SessionController from "../controllers/SessionController"
 import { TableInfo, TablePage, TableRow } from "../models/TableInfo"
 
-const minimumRowHeight = 32
 const fetchDelay = 500 // ms
 
 class TableData {
@@ -14,11 +13,13 @@ class TableData {
     private fetchState: FetchState = { state: 'idle' }
     onFetchRangeUpdated?: (range: RowRange | null) => void
     private measureInfo: MeasureInfo
+    private readonly minRowHeight: number
 
     constructor(tableInfo: TableInfo, measureInfo: MeasureInfo) {
+        this.minRowHeight = measureInfo.lineHeight + measureInfo.totalCellPadding.y
         this.tableID = tableInfo.table_id
         this.numberOfRows = tableInfo.row_count
-        this.totalHeight = this.numberOfRows * minimumRowHeight
+        this.totalHeight = this.numberOfRows * this.minRowHeight
         this.measureInfo = measureInfo
         this.indexWidth = 0 // Updated later
         // Measure columns
@@ -29,8 +30,8 @@ class TableData {
         })
         // First page
         const { offset, row_count: rowCount, rows } = tableInfo.first_page
-        const rowHeights = Array(rowCount).fill(minimumRowHeight)
-        const pageHeight = rowCount * minimumRowHeight
+        const rowHeights = Array(rowCount).fill(this.minRowHeight)
+        const pageHeight = rowCount * this.minRowHeight
         const firstPage: LoadedPage = { loaded: true, offset, rowCount, rows, rowHeights, pageHeight }
         this.loadedPages = [ firstPage ]
         this.updateMeasurements(firstPage)
@@ -157,8 +158,8 @@ class TableData {
         const isOutdated = (page.offset != offset) // Count can be less than requested for the last page
         // Create page
         const { offset: pageOffset, row_count: rowCount, rows } = page
-        const rowHeights = Array(rowCount).fill(minimumRowHeight)
-        const pageHeight = rowCount * minimumRowHeight
+        const rowHeights = Array(rowCount).fill(this.minRowHeight)
+        const pageHeight = rowCount * this.minRowHeight
         const loadedPage: LoadedPage = { loaded: true, offset: pageOffset, rowCount, rows, rowHeights, pageHeight }
         this.insertPage(loadedPage)
         // Reset fetch state & notify
@@ -258,7 +259,7 @@ class TableData {
         if (pageResult === null) { return null }
         let { page, y: currentY } = pageResult
         for (let i = 0; i < page.rowCount; i++) {
-            const height = page.loaded ? page.rowHeights[i] : minimumRowHeight
+            const height = page.loaded ? page.rowHeights[i] : this.minRowHeight
             if (y >= currentY && y < currentY + height) {
                 return page.offset + i
             }
@@ -286,7 +287,7 @@ class TableData {
                 const rowIndex = page.offset + i
                 const rowY = y
                 let row: TableRow | null = null
-                let rowHeight = minimumRowHeight
+                let rowHeight = this.minRowHeight
                 if (page.loaded) {
                     row = page.rows[i]
                     rowHeight = page.rowHeights[i]
@@ -307,7 +308,7 @@ class TableData {
             // If there is a gap between the previous page and this page, return an unloaded page
             if (row < page.offset) {
                 const rowCount = page.offset - row
-                const pageHeight = rowCount * minimumRowHeight
+                const pageHeight = rowCount * this.minRowHeight
                 const result = callback({ loaded: false, offset: row, rowCount, pageHeight }, y)
                 if (result === 'stop') { return }
                 row = page.offset
@@ -322,7 +323,7 @@ class TableData {
         // If there is a gap between the last page and the end of the table, return an unloaded page
         if (row < this.numberOfRows) {
             const rowCount = (this.numberOfRows - row)
-            const pageHeight = rowCount * minimumRowHeight
+            const pageHeight = rowCount * this.minRowHeight
             callback({ loaded: false, offset: row, rowCount: this.numberOfRows - row, pageHeight }, y)
         }
     }

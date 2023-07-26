@@ -1,8 +1,9 @@
+import { TableInfo } from "./TableInfo";
 
 export type ChatMessage = {
     id: string;
     sender: 'user' | 'assistant';
-    content: TextContent | PlotContent;
+    content: TextContent | PlotContent | TableContent;
     isEphemeral: boolean;
 }
 
@@ -12,4 +13,8 @@ export type TextContent = {
 
 export type PlotContent = {
     plot: string;
+}
+
+export type TableContent = {
+    table: TableInfo;
 }

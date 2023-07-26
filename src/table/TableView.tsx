@@ -23,20 +23,21 @@ interface State {
 
 class TableView extends React.Component<Props, State> implements SessionControllerEventListener {
     scrollViewRef: React.RefObject<HTMLDivElement>
+    readonly minRowHeight: number
 
     static scrollbarWidth = 8
-    static minRowHeight = 32
+
     static measureInfo: MeasureInfo = {
         fonts: {
-            header: '600 16px system-ui, sans-serif',
-            index: '600 16px system-ui, sans-serif',
-            body: '400 16px system-ui, sans-serif',
+            header: '600 14px system-ui, sans-serif',
+            index: '600 14px system-ui, sans-serif',
+            body: '400 14px system-ui, sans-serif',
         },
         totalCellPadding: {
             x: (2 * 12 + 1), // 2 * padding + border
             y: (2 * 6 + 1)
         },
-        lineHeight: 19,
+        lineHeight: 16.5,
         maxColumnWidth: 320
     }
 
@@ -51,6 +52,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
             fetchRange: props.table.getFetchRange()
         }
         this.scrollViewRef = React.createRef()
+        this.minRowHeight = TableView.measureInfo.lineHeight + TableView.measureInfo.totalCellPadding.y
         this.handleScrollViewportChanged = this.handleScrollViewportChanged.bind(this)
     }
 
@@ -107,7 +109,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
 
         return <div className='table-view' style={{ ...styles.tableView }}>
             <div className="table-view-table" style={styles.table}>
-                <div className="table-view-header" style={{ ...styles.header, left: startColumnX, height: TableView.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
+                <div className="table-view-header" style={{ ...styles.header, left: startColumnX, height: this.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
                     <div className="table-view-row" style={{ ...styles.row, height: '100%' }}>
                     <TableHeaderCell key={''} content={''} isIndex={true} isLastColumn={false} scrollX={scrollX} width={indexWidth} scrollbarWidth={TableView.scrollbarWidth} />
                     { columns.map((column, j) => {
@@ -163,7 +165,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                 </div>
             </div>
             <div className='table-view-scroll-view-container' style={{ ...styles.scrollViewContainer, pointerEvents: 'auto' }}>
-                <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: TableView.minRowHeight }} onScroll={this.handleScrollViewportChanged} onResize={this.handleScrollViewportChanged}>
+                <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: this.minRowHeight }} onScroll={this.handleScrollViewportChanged} onResize={this.handleScrollViewportChanged}>
                     <div style={{ minWidth: '100%', width: totalBodyWidth, height: totalBodyHeight }}></div>
                 </div>
             </div>
@@ -184,16 +186,13 @@ class TableView extends React.Component<Props, State> implements SessionControll
 }
 
 const styles: Record<string, React.CSSProperties> = {
-    container: {
-        display: 'flex',
-        overflow: 'hidden',
-    },
     tableView: {
         boxSizing: 'border-box',
         display: 'flex',
         position: 'relative',
         overflow: 'hidden',
         border: '1px solid #e6e6e6',
+        borderRadius: '4px',
         userSelect: 'none',
         width: '100%',
         height: '100%',
@@ -232,7 +231,6 @@ const styles: Record<string, React.CSSProperties> = {
     },
     body: {
         position: 'relative',
-        zIndex: 0,
         font: TableView.measureInfo.fonts.body,
     },
     row: {

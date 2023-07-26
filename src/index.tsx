@@ -5,6 +5,8 @@ import SessionController, { SessionControllerEventListener } from './controllers
 import TableData from './table/TableData';
 import TableView from './table/TableView';
 import { TableInfo } from './models/TableInfo';
+import UUIDUtilities from './utilities/UUIDUtilities';
+import { ChatMessage } from './models/ChatMessage';
 
 interface Props {
   authToken: string
@@ -41,8 +43,13 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
     }
 
     onTableUpdated(table: TableInfo) {
-        const tableData = new TableData(table, TableView.measureInfo);
-        this.setState({ table: tableData })
+        const chatMessage: ChatMessage = {
+            id: UUIDUtilities.unsecureUUID(),
+            sender: 'assistant',
+            content: { table: table },
+            isEphemeral: false,
+        }
+        SessionController.getInstance().addChatMessage(chatMessage)
     }
 
     render() {
