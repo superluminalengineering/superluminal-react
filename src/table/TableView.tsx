@@ -126,7 +126,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                             const cellHeight = rowSlice.rowHeights[n]
                             const rowHeight = cellHeight + (isLastRow ? 8 : 0)
                             const value = row ? String(row.index + 1) : '' // For UI start counting at 1
-                            return <div className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }} key={key}>
+                            return <div key={key} className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }}>
                                 <TableCell width={indexWidth} height={cellHeight} value={value} isIndex={true} isLastColumn={false} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
                             </div>
                         })}
@@ -145,14 +145,14 @@ class TableView extends React.Component<Props, State> implements SessionControll
                                 const rowWidth = totalBodyWidth
                                 const innerRowHeight = rowHeight - 1 // -1 for border
                                 const padding = 6
-                                return <div className="table-view-row" style={{ ...styles.row, borderBottom, width: rowWidth, height: rowHeight, background }}>
+                                return <div key={key} className="table-view-row" style={{ ...styles.row, borderBottom, width: rowWidth, height: rowHeight, background }}>
                                     <ContentLoader viewBox={`0 0 ${rowWidth} ${innerRowHeight}`}>
                                         <rect x={padding} y={padding} width={rowWidth - (2 * padding)} height={innerRowHeight - (2 * padding)} />
                                     </ContentLoader>
                                 </div>
                             }
                             // Regular render
-                            return <div className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }} key={key}>{ columns.map((_column, j) => {
+                            return <div key={key} className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }}>{ columns.map((_column, j) => {
                                 const value = row?.values[j] ?? ''
                                 const width = columnWidths[j]
                                 const isLastColumn = (j == columns.length - 1)
