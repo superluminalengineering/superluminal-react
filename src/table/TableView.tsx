@@ -196,7 +196,7 @@ const styles: Record<string, React.CSSProperties> = {
         border: '1px solid #e6e6e6',
         borderRadius: '4px',
         userSelect: 'none',
-        width: '100%',
+        maxWidth: '100%',
         height: '100%',
     },
     scrollViewContainer: {

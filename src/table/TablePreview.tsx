@@ -39,6 +39,8 @@ class TablePreview extends React.Component<Props, State> {
 
 const styles: Record<string, React.CSSProperties> = {
     tablePreview: {
+        display: 'flex',
+        justifyContent: 'center',
         maxHeight: '240px'
     }
 }
