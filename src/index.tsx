@@ -20,6 +20,7 @@ interface Props {
 
 interface State {
     table: TableData | null
+    originalRowCount: number | null
 }
 
 class Superluminal extends React.Component<Props, State> implements SessionControllerEventListener {
@@ -27,7 +28,7 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
 
     constructor(props: Props) {
         super(props);
-        this.state = { table: null };
+        this.state = { table: null, originalRowCount: null };
         if (!props.authToken) {
             console.log('You must provide a valid Superluminal auth token.');
         }
@@ -43,6 +44,14 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
     }
 
     onTableUpdated(table: TableInfo) {
+        // Hide full table
+        const { originalRowCount } = this.state;
+        if (originalRowCount === null) { 
+            this.setState({ originalRowCount: table.row_count })
+            return
+        } else if (originalRowCount === table.row_count) {
+            return
+        }
         const chatMessage: ChatMessage = {
             id: UUIDUtilities.unsecureUUID(),
             sender: 'assistant',
