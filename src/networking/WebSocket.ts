@@ -26,6 +26,7 @@ export class SLWebSocket extends WebSocket {
     private slURL: string;
     private slListeners: SLWebSocketEventListener[] = [];
     private onReconnect: () => Promise<void>;
+    private utf8Encoder = new TextEncoder();
     slState: SLWebSocketState = SLWebSocketState.Closed;
 
     static instance: SLWebSocket;
@@ -115,8 +116,7 @@ export class SLWebSocket extends WebSocket {
 
     slSend(path: WebSocketMessagePath, token: string, payload: any) {
         const event = { ...payload, ...{ path: path, token: token } };
-        const base64EncodedEvent = btoa(JSON.stringify(event));
-        const bytes = decode(base64EncodedEvent)
+        const bytes = this.utf8Encoder.encode(JSON.stringify(event));
         this.sendOrBuffer(bytes);
     }
 
