@@ -194,6 +194,12 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     onChatMessagesUpdated(chatMessages: ChatMessage[]) {
         this.setState({ chatMessages });
+        setTimeout(() => {
+            const scrollView = this.scrollViewRef.current;
+            if (scrollView) {
+                scrollView.scrollTo({ top: scrollView.scrollHeight, behavior: 'smooth' });
+            }
+        }, 0);
     }
 }
 
