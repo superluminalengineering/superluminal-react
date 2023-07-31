@@ -23,7 +23,7 @@
     "bugs": {
         "url": "https://github.com/superluminalengineering/superluminal-react/issues"
     },
-    "homepage": "https://getluminal.com",
+    "homepage": "https://superluminal.dev",
     "dependencies": {
         "base64-arraybuffer": "^1.0.2",
         "plotly.js": "^2.24.3",

@@ -82,7 +82,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     }
 
     getWatermarkView(): any {
-        return <a style={styles.watermark} href='https://www.getluminal.com' target='_blank'>
+        return <a style={styles.watermark} href='https://www.superluminal.dev' target='_blank'>
             <span style={{ opacity: 0.4, fontSize: '11px' }}>Powered by</span>
             <img src={LogoText} height="14px" style={{ opacity: 0.4, marginTop: '1px' }} />
         </a>
@@ -155,7 +155,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
             </div>
         } else {
             return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <img src='https://getluminal.com/img/ai.gif' width="80px" height="80px" />
+                <img src='https://superluminal.dev/images/ai.gif' width="80px" height="80px" />
                 <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000' }}>Loading</div>
             </div>
         }
