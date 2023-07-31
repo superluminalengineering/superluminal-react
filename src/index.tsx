@@ -23,7 +23,7 @@ interface State {
     originalRowCount: number | null
 }
 
-class Superluminal extends React.Component<Props, State> implements SessionControllerEventListener {
+class Superluminal extends React.Component<Props, State> {
     assistantViewRef = React.createRef<AssistantView>();
 
     constructor(props: Props) {
@@ -33,32 +33,6 @@ class Superluminal extends React.Component<Props, State> implements SessionContr
             console.log('You must provide a valid Superluminal auth token.');
         }
         SessionController.getInstance().authToken = props.authToken;
-    }
-
-    componentDidMount() {
-        SessionController.getInstance().addListener(this)
-    }
-
-    componentWillUnmount() {
-        SessionController.getInstance().removeListener(this)
-    }
-
-    onTableUpdated(table: TableInfo) {
-        // Hide full table
-        const { originalRowCount } = this.state;
-        if (originalRowCount === null) { 
-            this.setState({ originalRowCount: table.row_count })
-            return
-        } else if (originalRowCount === table.row_count) {
-            return
-        }
-        const chatMessage: ChatMessage = {
-            id: UUIDUtilities.unsecureUUID(),
-            sender: 'assistant',
-            content: { table: table },
-            isEphemeral: false,
-        }
-        SessionController.getInstance().addChatMessage(chatMessage)
     }
 
     render() {

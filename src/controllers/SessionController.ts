@@ -10,7 +10,6 @@ import { TableInfo, TablePage, isTableInfo, isTablePage } from "../models/TableI
 export interface SessionControllerEventListener {
     onSessionStateUpdated?: (sessionState: SessionState) => void;
     onChatMessagesUpdated?: (chatMessages: ChatMessage[]) => void;
-    onTableUpdated?: (table: TableInfo) => void;
     onTablePageReceived?: (page: TablePage) => void;
 }
 
@@ -99,7 +98,6 @@ class SessionController implements SLWebSocketEventListener {
             case 'message': this.onMessageReceived(json); break;
             case 'update-session-state': this.onSessionStateUpdated(json); break;
             case 'update-assistant-reply-state': this.onAssistantStateUpdated(json); break;
-            case 'update-table': this.onTableUpdated(json); break;
             case 'table-page': this.onTablePageReceived(json); break;
             default: break;
         }
@@ -144,12 +142,6 @@ class SessionController implements SLWebSocketEventListener {
             },
             isEphemeral: true
         });
-    }
-
-    onTableUpdated(json: any) {
-        const table = json
-        if (!isTableInfo(table)) { return }
-        this.listeners.forEach((listener) => listener.onTableUpdated?.(table));    
     }
 
     onTablePageReceived(json: any) {
