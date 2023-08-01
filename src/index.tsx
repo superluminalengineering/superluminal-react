@@ -29,7 +29,7 @@ class Superluminal extends React.Component<Props, State> {
 
     render() {
         const { style, userProfilePictureStyle, userMessageStyle, assistantMessageStyle, inputStyle, sendButtonStyle } = this.props;
-        return <div style={{ minWidth: '420px', minHeight: '640px', maxWidth: '100%', maxHeight: '100%', flexShrink: 0 }}>
+        return <div style={{ minWidth: '420px', minHeight: '640px', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', flexShrink: 0 }}>
             <AssistantView
                 ref={this.assistantViewRef}
                 style={style}
