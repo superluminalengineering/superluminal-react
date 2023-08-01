@@ -1,11 +1,12 @@
 import React from 'react'
 import ContentLoader from 'react-content-loader';
 
-import TableHeaderCell from './TableHeaderCell'
-import TableCell from './TableCell'
 import ObjectUtilities from '../utilities/ObjectUtilities'
-import TableData, { MeasureInfo, RowRange, RowSlice } from './TableData'
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController'
+import TableCell from './TableCell'
+import TableData, { MeasureInfo, RowRange, RowSlice } from './TableData'
+import TableHeaderCell from './TableHeaderCell'
+
 import { TablePage } from '../models/TableInfo'
 
 interface Props {
@@ -108,10 +109,10 @@ class TableView extends React.Component<Props, State> implements SessionControll
 
         table.onFetchRangeUpdated = (fetchRange) => this.setState({ fetchRange })
 
-        return <div className='table-view' style={{ ...styles.tableView, ...tableStyle }}>
-            <div className="table-view-table" style={styles.table}>
-                <div className="table-view-header" style={{ ...styles.header, left: startColumnX, height: this.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
-                    <div className="table-view-row" style={{ ...styles.row, height: '100%' }}>
+        return <div style={{ ...styles.tableView, ...tableStyle }}>
+            <div style={styles.table}>
+                <div style={{ ...styles.header, left: startColumnX, height: this.minRowHeight, boxShadow: (scrollY > 0 ? shadow : 'none') }}>
+                    <div style={{ ...styles.row, height: '100%' }}>
                     <TableHeaderCell key={''} content={''} isIndex={true} isLastColumn={false} scrollX={scrollX} width={indexWidth} scrollbarWidth={TableView.scrollbarWidth} />
                     { columns.map((column, j) => {
                         const isLastColumn = (j == columns.length - 1)
@@ -120,7 +121,7 @@ class TableView extends React.Component<Props, State> implements SessionControll
                     }) }</div>
                 </div>
                 <div style={{ display: 'flex' }}>
-                    <div className="table-view-index" style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
+                    <div style={{ ...styles.index, top: rowSlice.startY - scrollY, boxShadow: (scrollX > 0 ? shadow : 'none') }}>
                         { rowSlice.rows.map((row, n) => {
                             const rowIndex = rowSlice.startIndex + n
                             const key = row?.index ?? `empty-${n}`
@@ -129,12 +130,12 @@ class TableView extends React.Component<Props, State> implements SessionControll
                             const cellHeight = rowSlice.rowHeights[n]
                             const rowHeight = cellHeight + (isLastRow ? 8 : 0)
                             const value = row ? String(row.index + 1) : '' // For UI start counting at 1
-                            return <div key={key} className="table-view-row" style={{ ...styles.row, height: rowHeight, borderBottom }}>
+                            return <div key={key} style={{ ...styles.row, height: rowHeight, borderBottom }}>
                                 <TableCell width={indexWidth} height={cellHeight} value={value} isIndex={true} isLastColumn={false} isLastRow={isLastRow} scrollbarWidth={TableView.scrollbarWidth} />
                             </div>
                         })}
                     </div>
-                    <div className="table-view-body" style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY, height: totalBodyHeight }}>
+                    <div style={{ ...styles.body, left: startColumnX, top: rowSlice.startY - scrollY, height: totalBodyHeight }}>
                         { rowSlice.rows.map((row, n) => {
                             const rowIndex = rowSlice.startIndex + n
                             const key = row?.index ?? `empty-${n}`
@@ -148,14 +149,14 @@ class TableView extends React.Component<Props, State> implements SessionControll
                                 const rowWidth = totalBodyWidth
                                 const innerRowHeight = rowHeight - 1 // -1 for border
                                 const padding = 6
-                                return <div key={key} className="table-view-row" style={{ ...styles.row, borderBottom, width: rowWidth, height: rowHeight, background }}>
+                                return <div key={key} style={{ ...styles.row, borderBottom, width: rowWidth, height: rowHeight, background }}>
                                     <ContentLoader viewBox={`0 0 ${rowWidth} ${innerRowHeight}`}>
                                         <rect x={padding} y={padding} width={rowWidth - (2 * padding)} height={innerRowHeight - (2 * padding)} />
                                     </ContentLoader>
                                 </div>
                             }
                             // Regular render
-                            return <div key={key} className="table-view-row" style={{ ...styles.row, borderBottom, height: rowHeight, background }}>{ columns.map((_column, j) => {
+                            return <div key={key} style={{ ...styles.row, borderBottom, height: rowHeight, background }}>{ columns.map((_column, j) => {
                                 const value = row?.values[j] ?? ''
                                 const width = columnWidths[j]
                                 const isLastColumn = (j == columns.length - 1)
@@ -165,8 +166,8 @@ class TableView extends React.Component<Props, State> implements SessionControll
                     </div>
                 </div>
             </div>
-            <div className='table-view-scroll-view-container' style={{ ...styles.scrollViewContainer, pointerEvents: 'auto' }}>
-                <div ref={this.scrollViewRef} className='table-view-scroll-view' style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: this.minRowHeight }} onScroll={this.handleScrollViewportChanged} onResize={this.handleScrollViewportChanged}>
+            <div style={{ ...styles.scrollViewContainer, pointerEvents: 'auto' }}>
+                <div ref={this.scrollViewRef} style={{ ...styles.scrollView, marginLeft: indexWidth, marginTop: this.minRowHeight }} onScroll={this.handleScrollViewportChanged} onResize={this.handleScrollViewportChanged}>
                     <div style={{ minWidth: '100%', width: totalBodyWidth, height: totalBodyHeight }}></div>
                 </div>
             </div>

@@ -29,7 +29,6 @@ class InlineInput extends React.Component<Props, State> {
         const { placeholder, style, type } = this.props;
         return <input
             ref={this.ref}
-            className="inline-input"
             name="text"
             type={ type ?? "text" }
             style={{ ...styles.inlineInput, ...style }}

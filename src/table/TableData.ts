@@ -1,4 +1,5 @@
 import SessionController from "../controllers/SessionController"
+
 import { TableInfo, TablePage, TableRow } from "../models/TableInfo"
 
 const fetchDelay = 500 // ms

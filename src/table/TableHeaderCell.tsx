@@ -19,13 +19,11 @@ class TableHeaderCell extends React.Component<Props, State> {
         const borderRight = isLastColumn ? 'none' : '1px solid #e6e6e6';
         if (isIndex) {
             return <div
-                className="table-view-header-cell"
                 style={{ ...styles.headerCell, left: scrollX, width: width, borderRight, zIndex: 1 }}>
                 { content }
             </div>
         } else {
             return <div
-                className="table-view-header-cell"
                 style={{ ...styles.headerCell, width: width, borderRight }}>
                 <span style={styles.inner}>{ content }</span>
             </div>

@@ -2,6 +2,7 @@ import React from 'react';
 
 import TableData from './TableData';
 import TableView from './TableView';
+
 import { TableInfo } from '../models/TableInfo';
 
 interface Props {

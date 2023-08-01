@@ -22,7 +22,7 @@ class TableCell extends React.Component<Props, State> {
         const fontWeight = isIndex ? 600 : 'regular'
         const paddingRight = 12 + (isLastColumn ? scrollbarWidth : 0)
         const paddingBottom = 6 + (isLastRow ? scrollbarWidth : 0)
-        return <div className="table-view-cell"
+        return <div
             style={{ ...styles.cell, fontWeight, width, height, paddingRight, paddingBottom, borderRight }}>
             {value}
         </div>
