@@ -25,7 +25,6 @@
     },
     "homepage": "https://superluminal.dev",
     "dependencies": {
-        "base64-arraybuffer": "^1.0.2",
         "plotly.js": "^2.24.3",
         "react": "^18.2.0",
         "react-content-loader": "^6.2.1",

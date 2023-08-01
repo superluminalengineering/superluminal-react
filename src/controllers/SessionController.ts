@@ -5,7 +5,7 @@ import UUIDUtilities from "../utilities/UUIDUtilities";
 import { ChatMessage } from "../models/ChatMessage";
 import { SessionState } from "../models/SessionState";
 import { SLWebSocket, SLWebSocketEventListener } from "../networking/WebSocket";
-import { TableInfo, TablePage, isTableInfo, isTablePage } from "../models/TableInfo";
+import { TablePage, isTablePage } from "../models/TableInfo";
 
 export interface SessionControllerEventListener {
     onSessionStateUpdated?: (sessionState: SessionState) => void;

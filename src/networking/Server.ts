@@ -1,4 +1,3 @@
-import SessionController from "../controllers/SessionController";
 
 import { ChatMessage } from "../models/ChatMessage";
 import { SessionState } from "../models/SessionState";

@@ -1,6 +1,4 @@
 
-import { decode } from 'base64-arraybuffer';
-
 import ArrayBufferUtilities from '../utilities/ArrayBufferUtilities';
 
 import { WebSocketMessagePath } from '../models/WebSocketMessagePath';

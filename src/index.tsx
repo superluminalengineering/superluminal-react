@@ -1,12 +1,7 @@
 import React from 'react';
 
 import AssistantView from './components/AssistantView';
-import SessionController, { SessionControllerEventListener } from './controllers/SessionController';
-import TableData from './table/TableData';
-import TableView from './table/TableView';
-import { TableInfo } from './models/TableInfo';
-import UUIDUtilities from './utilities/UUIDUtilities';
-import { ChatMessage } from './models/ChatMessage';
+import SessionController from './controllers/SessionController';
 
 interface Props {
   authToken: string
@@ -18,17 +13,14 @@ interface Props {
   sendButtonStyle?: React.CSSProperties
 }
 
-interface State {
-    table: TableData | null
-    originalRowCount: number | null
-}
+interface State { }
 
 class Superluminal extends React.Component<Props, State> {
     assistantViewRef = React.createRef<AssistantView>();
 
     constructor(props: Props) {
         super(props);
-        this.state = { table: null, originalRowCount: null };
+        this.state = { };
         if (!props.authToken) {
             console.log('You must provide a valid Superluminal auth token.');
         }
@@ -37,22 +29,16 @@ class Superluminal extends React.Component<Props, State> {
 
     render() {
         const { style, userProfilePictureStyle, userMessageStyle, assistantMessageStyle, inputStyle, sendButtonStyle } = this.props;
-        const { table } = this.state;
-        return <div style={{ display: 'flex', alignItems: 'stretch', gap: '32px', width: '100%', height: '100%' }}>
-            <div style={{ minWidth: '420px', minHeight: '640px', maxWidth: '100%', maxHeight: '100%', flexShrink: 0 }}>
-                <AssistantView
-                    ref={this.assistantViewRef}
-                    style={style}
-                    userProfilePictureStyle={userProfilePictureStyle}
-                    userMessageStyle={userMessageStyle}
-                    assistantMessageStyle={assistantMessageStyle}
-                    inputStyle={inputStyle}
-                    sendButtonStyle={sendButtonStyle}
-                />
-            </div>
-            <div style={{ flexGrow: 1, overflow: 'hidden' }}>
-                { table && <TableView table={table} /> }
-            </div>
+        return <div style={{ minWidth: '420px', minHeight: '640px', maxWidth: '100%', maxHeight: '100%', flexShrink: 0 }}>
+            <AssistantView
+                ref={this.assistantViewRef}
+                style={style}
+                userProfilePictureStyle={userProfilePictureStyle}
+                userMessageStyle={userMessageStyle}
+                assistantMessageStyle={assistantMessageStyle}
+                inputStyle={inputStyle}
+                sendButtonStyle={sendButtonStyle}
+            />
         </div>
     }
 
