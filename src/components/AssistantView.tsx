@@ -155,8 +155,8 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
             </div>
         } else {
             return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <img src='https://superluminal.dev/images/ai.gif' width="80px" height="80px" />
-                <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000' }}>Loading</div>
+                <img src='https://superluminal.dev/images/ai_new.gif' width="56px" height="56px" />
+                <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000', marginTop: '8px' }}>Loading</div>
             </div>
         }
     }
