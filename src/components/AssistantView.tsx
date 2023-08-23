@@ -153,12 +153,16 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                     document.body
                 )}
             </div>
-        } else {
+        } else if (sessionState == 'initializing' || sessionState == 'waiting_for_data' || sessionState == 'validating_data') {
             return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                 <img src='https://superluminal.dev/images/ai_new.gif' width="56px" height="56px" draggable={false} />
                 <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000', marginTop: '8px' }}>Loading</div>
             </div>
-        }
+        } else { // 'error' | 'unavailable'
+            return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '8px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#000000', marginTop: '8px', textAlign: 'center' }}>An unexpected error occurred.<br />Please try again later.</div>
+            </div>
+        } 
     }
 
     getInputView(): any {
@@ -188,7 +192,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         this.setState({ user });
     }
 
-    onSessionStateUpdated(sessionState: SessionState) {
+    onSessionStateUpdated(sessionState: SessionState, error: string | null) {
         this.setState({ sessionState });
     }
 

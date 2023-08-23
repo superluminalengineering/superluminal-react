@@ -8,7 +8,7 @@ import { SLWebSocket, SLWebSocketEventListener } from "../networking/WebSocket";
 import { TablePage, isTablePage } from "../models/TableInfo";
 
 export interface SessionControllerEventListener {
-    onSessionStateUpdated?: (sessionState: SessionState) => void;
+    onSessionStateUpdated?: (sessionState: SessionState, error: string | null) => void;
     onChatMessagesUpdated?: (chatMessages: ChatMessage[]) => void;
     onTablePageReceived?: (page: TablePage) => void;
 }
@@ -18,6 +18,7 @@ class SessionController implements SLWebSocketEventListener {
     user: { id: string, name: string } | null = null;
     projectID: string = "main";
     sessionState: SessionState = 'initializing';
+    error: string | null = null;
     authToken: string | null = null;
     chatMessages: ChatMessage[] = [];
 
@@ -56,7 +57,8 @@ class SessionController implements SLWebSocketEventListener {
         Server.getSession(this.authToken)
             .then((response) => {
                 this.sessionState = response.session_state;
-                this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(response.session_state));
+                this.error = response.error;
+                this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(response.session_state, response.error));
                 this.chatMessages = response.chat_history;
                 this.listeners.forEach((listener) => listener.onChatMessagesUpdated?.(response.chat_history));
             })
@@ -113,10 +115,12 @@ class SessionController implements SLWebSocketEventListener {
 
     onSessionStateUpdated(json: JSON) {
         const sessionState = json['session_state'];
+        const error = json['error'];
         if (!sessionState) { return; }
         this.sessionState = sessionState;
-        console.log(`Session state: ${sessionState}`);
-        this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(sessionState));
+        this.error = error;
+        console.log(`Session state: ${sessionState}` + (error ? ` (${error})` : ''));
+        this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(sessionState, error));
     }
 
     onAssistantStateUpdated(json: JSON) {
