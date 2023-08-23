@@ -2,11 +2,17 @@
 import { ChatMessage } from "../models/ChatMessage";
 import { SessionState } from "../models/SessionState";
 
+type GetSessionResponse = {
+    session_state: SessionState,
+    error: string | null,
+    chat_history: ChatMessage[]
+}
+
 class Server {
 
     static baseURL = "https://app.getluminal.com";
 
-    static getSession(authToken: string): Promise<{ session_state: SessionState, chat_history: ChatMessage[] }> {
+    static getSession(authToken: string): Promise<GetSessionResponse> {
         return fetch(`${Server.baseURL}/session`, {
             method: "GET",
             headers: {

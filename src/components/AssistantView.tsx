@@ -84,7 +84,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     getWatermarkView(): any {
         return <a style={styles.watermark} href='https://www.superluminal.dev' target='_blank'>
             <span style={{ opacity: 0.4, fontSize: '11px' }}>Powered by</span>
-            <img src={LogoText} height="14px" style={{ opacity: 0.4, marginTop: '1px' }} />
+            <img src={LogoText} height="14px" style={{ opacity: 0.4, marginTop: '1px' }} draggable={false} />
         </a>
     }
 
@@ -109,7 +109,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                         case 'assistant':
                             if ('text' in message.content) {
                                 return <div key={message.id} style={styles.messageContainer}>
-                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" draggable={false} />
                                     <div style={{ ...styles.assistantMessage, ...assistantMessageStyle }}>{message.content.text}</div>
                                 </div>
                             } else if ('plot' in message.content) {
@@ -120,7 +120,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                                 const height = ((plot.layout.width * width) / plot.layout.height);
                                 const layout = { ...plot.layout, width, height, margin: {  t: 30, b: 10, l: 10, r: 10, pad: 0 } };
                                 return <div key={message.id} style={styles.messageContainer}>
-                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
+                                    <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" draggable={false} />
                                     <div style={{ display: 'flex', flexDirection: 'column', rowGap: '12px' }}>
                                         <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
                                             <Plot data={plot.data} layout={layout} config={{ toImageButtonOptions: { scale: 3 } }} />
@@ -131,8 +131,8 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                                 const table = message.content.table;
                                 return <div key={message.id} style={styles.messageContainer}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" />
-                                        <img src={IconExpand} width="20px" height="20px" onClick={() => this.expandTable(table)} />
+                                        <img src={LogoInverted} style={styles.profilePictureView} width="24px" height="24px" draggable={false} />
+                                        <img src={IconExpand} width="20px" height="20px" onClick={() => this.expandTable(table)} draggable={false} />
                                     </div>
                                     <div style={{ ...styles.assistantMessage, ...{ maxWidth: '100%', background: '#FFFFFF' }, ...assistantMessageStyle }}>
                                         <TablePreview table={table} />
@@ -153,12 +153,16 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                     document.body
                 )}
             </div>
-        } else {
+        } else if (sessionState == 'initializing' || sessionState == 'waiting_for_data' || sessionState == 'validating_data') {
             return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <img src='https://superluminal.dev/images/ai.webp' width="64px" height="64px" />
+                <img src='https://superluminal.dev/images/ai.webp' width="64px" height="64px" draggable={false} />
                 <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000', marginTop: '8px' }}>Loading</div>
             </div>
-        }
+        } else { // 'error' | 'unavailable'
+            return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '8px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#000000', marginTop: '8px', textAlign: 'center' }}>An unexpected error occurred.<br />Please try again later.</div>
+            </div>
+        } 
     }
 
     getInputView(): any {
@@ -188,7 +192,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         this.setState({ user });
     }
 
-    onSessionStateUpdated(sessionState: SessionState) {
+    onSessionStateUpdated(sessionState: SessionState, error: string | null) {
         this.setState({ sessionState });
     }
 
