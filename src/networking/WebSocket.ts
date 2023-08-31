@@ -48,6 +48,7 @@ export class SLWebSocket extends WebSocket {
 
     private static initializeWithBufferAndListeners(url: string, buffer: ArrayBuffer[], listeners: SLWebSocketEventListener[], onReconnect: () => Promise<void>): SLWebSocket {
         const instance = new SLWebSocket(url, buffer, listeners, onReconnect);
+        if (!instance) { console.error(`[Web Socket] Failed to initialize web socket.`); }
         SLWebSocket.instance = instance;
         return instance;
     }
@@ -92,7 +93,7 @@ export class SLWebSocket extends WebSocket {
                     this.sendBufferedMessages();
                 }).catch((error) => {
                     if (!this.isCurrent) { return; }
-                    console.log(`[Web Socket] Reconnection failed due to error: ${error}`);
+                    console.error(`[Web Socket] Reconnection failed due to error: ${error}`);
                     this.close(4000, `Reconnection failed due to error: ${error}`); // 4000-4999 are reserved for application use
                 });
             } else {
@@ -176,7 +177,7 @@ export class SLWebSocket extends WebSocket {
     }
 
     private onError(error: ErrorEvent) {
-        console.log(`[Web Socket] Error: ${error.message}.`);
+        console.error(`[Web Socket] Error: ${error.message}.`);
     }
 
     private onClose(e: CloseEvent) {

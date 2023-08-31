@@ -45,10 +45,10 @@ class Superluminal extends React.Component<Props, State> {
 
     setUser(user: { id: string, name: string }) {
         if (!user.id) {
-            return console.log('You must provide a valid user ID.');
+            return console.error('You must provide a valid user ID.');
         }
         if (!user.name) {
-            return console.log('You must provide a valid user name.');
+            return console.error('You must provide a valid user name.');
         }
         this.assistantViewRef.current?.setUser(user);
     }

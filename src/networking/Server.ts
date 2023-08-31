@@ -21,7 +21,7 @@ class Server {
             },
         })
         .then((response) => response.json())
-        .catch((error) => console.log(`Couldn't get session due to error: ${error?.reason ?? error}`));
+        .catch((error) => console.error(`Couldn't get session due to error: ${error?.reason ?? error}`));
     }
 }
 

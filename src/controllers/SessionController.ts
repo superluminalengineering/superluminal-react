@@ -50,7 +50,7 @@ class SessionController implements SLWebSocketEventListener {
 
     initialize() {
         if (!this.authToken) {
-            console.log("Couldn't get session due to missing auth token.")
+            console.error("Couldn't get session due to missing auth token.")
             return
         }
         Server.getSession(this.authToken)
@@ -64,7 +64,7 @@ class SessionController implements SLWebSocketEventListener {
             .then(() => {
                 setTimeout(() => {
                     if (!this.authToken) {
-                        console.log("Couldn't connect web socket due to missing auth token.")
+                        console.error("Couldn't connect web socket due to missing auth token.")
                         return;
                     }
                     this.getWebSocket().slSend('connect-socket', this.authToken, {});
