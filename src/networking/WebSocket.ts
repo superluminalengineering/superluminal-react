@@ -42,7 +42,7 @@ export class SLWebSocket extends WebSocket {
     }
 
     static initialize(url: string, onReconnect: () => Promise<void>) {
-        if (SLWebSocket.instance !== undefined) { return; }
+        if (SLWebSocket.instance) { return; }
         SLWebSocket.initializeWithBufferAndListeners(url, [], [], onReconnect);
     }
 

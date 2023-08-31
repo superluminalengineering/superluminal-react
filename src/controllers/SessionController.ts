@@ -52,6 +52,8 @@ class SessionController implements SLWebSocketEventListener {
             console.log("Couldn't get session due to missing auth token.")
             return
         }
+        SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
+        SLWebSocket.instance.addSLListener(this);
         Server.getSession(this.authToken)
             .then((response) => {
                 this.sessionState = response.session_state;
@@ -61,8 +63,6 @@ class SessionController implements SLWebSocketEventListener {
                 this.listeners.forEach((listener) => listener.onChatMessagesUpdated?.(response.chat_history));
             })
             .then(() => {
-                SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
-                SLWebSocket.instance.addSLListener(this);
                 setTimeout(() => {
                     if (!this.authToken) {
                         console.log("Couldn't connect web socket due to missing auth token.")
