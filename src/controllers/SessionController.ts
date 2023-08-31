@@ -29,7 +29,7 @@ class SessionController implements SLWebSocketEventListener {
     }
 
     static getInstance(): SessionController {
-        if (SessionController.instance == null) {
+        if (!SessionController.instance) {
             const instance = new SessionController();
             SessionController.instance = instance;
         }
