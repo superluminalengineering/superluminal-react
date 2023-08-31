@@ -1,6 +1,6 @@
 {
     "name": "superluminal-react",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "The official front-end React component for the Superluminal API.",
     "keywords": [
         "dashboard",
