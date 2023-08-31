@@ -5,11 +5,11 @@ import ReactDOM from 'react-dom';
 import InlineInput from './InlineInput';
 import ProfilePictureView from './ProfilePictureView';
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController';
-import { TableInfo } from '../models/TableInfo';
 import TablePreview from '../table/TablePreview';
 
 import { ChatMessage } from '../models/ChatMessage';
 import { SessionState } from '../models/SessionState';
+import { TableInfo } from '../models/TableInfo';
 
 import IconExpand from '../images/icon_expand.svg'
 import LogoInverted from '../images/logo_inverted.svg'
@@ -144,14 +144,14 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                         }
                     }) }
                 </div>
-                {modalContent && ReactDOM.createPortal(
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 10000, boxSizing: 'border-box', padding: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => this.setState({ modalContent: null })}>
+                { modalContent && ReactDOM.createPortal(
+                    <div style={{ position: 'absolute', top: '0px', left: '0px', width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 10000, boxSizing: 'border-box', padding: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => this.setState({ modalContent: null })}>
                         <div style={{ maxWidth: '100%', maxHeight: '100%' }}>
                             <TableView table={modalContent} style={{ maxHeight: 'calc(100vh - 64px)' }} />
                         </div>
                     </div>,
                     document.body
-                )}
+                ) }
             </div>
         } else if (sessionState == 'initializing' || sessionState == 'waiting_for_data' || sessionState == 'validating_data') {
             return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
@@ -178,8 +178,8 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     sendChatMessage() {
         const message = this.inputRef.current?.getContent() ?? null;
-        const { isProcessing } = this.state;
-        if (!message || message.length == 0 || isProcessing) { return; }
+        const { sessionState, isProcessing } = this.state;
+        if (!message || message.length == 0 || isProcessing || sessionState != 'ready') { return; }
         this.inputRef.current?.clear();
         SessionController.getInstance().sendChatMessage(message);
     }
