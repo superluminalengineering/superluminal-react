@@ -167,12 +167,13 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     getInputView(): any {
         const { inputStyle, sendButtonStyle } = this.props;
-        const { isProcessing } = this.state;
+        const { isProcessing, sessionState } = this.state;
+        const opacity = (isProcessing || sessionState != 'ready') ? 0.5 : 1;
         const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: '#0000000D',
-            width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity: isProcessing ? 0.5 : 1 };
+            width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity };
         return <div ref={this.inputContainerRef} style={styles.inputContainer}>
             <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onEnter={this.sendChatMessage} />
-            <div style={{ ...styles.sendButton, ...{ width: '96px', opacity: isProcessing ? 0.5 : 1 }, ...sendButtonStyle }} onClick={this.sendChatMessage}>Send</div>
+            <div style={{ ...styles.sendButton, ...{ width: '96px', opacity }, ...sendButtonStyle }} onClick={this.sendChatMessage}>Send</div>
         </div>
     }
 
