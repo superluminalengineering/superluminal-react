@@ -25,6 +25,7 @@ class Superluminal extends React.Component<Props, State> {
             console.log('You must provide a valid Superluminal auth token.');
         }
         SessionController.getInstance().authToken = props.authToken;
+        SessionController.getInstance().initialize();
     }
 
     render() {
@@ -49,7 +50,6 @@ class Superluminal extends React.Component<Props, State> {
         if (!user.name) {
             return console.log('You must provide a valid user name.');
         }
-        SessionController.getInstance().initialize(user);
         this.assistantViewRef.current?.setUser(user);
     }
 }

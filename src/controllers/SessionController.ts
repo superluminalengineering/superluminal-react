@@ -15,7 +15,6 @@ export interface SessionControllerEventListener {
 
 class SessionController implements SLWebSocketEventListener {
     listeners: SessionControllerEventListener[] = [];
-    user: { id: string, name: string } | null = null;
     projectID: string = "main";
     sessionState: SessionState = 'initializing';
     error: string | null = null;
@@ -48,8 +47,7 @@ class SessionController implements SLWebSocketEventListener {
         this.listeners.splice(index, 1);
     }
 
-    initialize(user: { id: string, name: string }) {
-        this.user = user;
+    initialize() {
         if (!this.authToken) {
             console.log("Couldn't get session due to missing auth token.")
             return

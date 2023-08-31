@@ -43,7 +43,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
     constructor(props: Props) {
         super(props);
         this.state = { 
-            user: SessionController.getInstance().user,
+            user: { id: '', name: 'User' },
             sessionState: SessionController.getInstance().sessionState,
             chatMessages: SessionController.getInstance().chatMessages,
             isProcessing: false,
