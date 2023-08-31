@@ -53,8 +53,6 @@ class SessionController implements SLWebSocketEventListener {
             console.log("Couldn't get session due to missing auth token.")
             return
         }
-        SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
-        SLWebSocket.instance.addSLListener(this);
         Server.getSession(this.authToken)
             .then((response) => {
                 this.sessionState = response.session_state;
@@ -69,14 +67,14 @@ class SessionController implements SLWebSocketEventListener {
                         console.log("Couldn't connect web socket due to missing auth token.")
                         return;
                     }
-                    SLWebSocket.instance.slSend('connect-socket', this.authToken, {});
+                    this.getWebSocket().slSend('connect-socket', this.authToken, {});
                 }, 0);
             });
     }
 
     sendChatMessage(message: string) {
         if (!this.authToken) { return; }
-        SLWebSocket.instance.slSend('send-message', this.authToken, { message: message });
+        this.getWebSocket().slSend('send-message', this.authToken, { message: message });
         this.addChatMessage({
             id: UUIDUtilities.unsecureUUID(),
             sender: 'user',
@@ -89,7 +87,17 @@ class SessionController implements SLWebSocketEventListener {
 
     getTablePage(tableID: string, offset: number, count: number) {
         if (!this.authToken) { return; }
-        SLWebSocket.instance.slSend('get-table-page', this.authToken, { table_id: tableID, offset: offset, count: count });
+        this.getWebSocket().slSend('get-table-page', this.authToken, { table_id: tableID, offset: offset, count: count });
+    }
+
+    getWebSocket(): SLWebSocket {
+        if (SLWebSocket.instance) {
+            return SLWebSocket.instance;
+        } else {
+            const webSocket = SLWebSocket.initialize('wss://app.getluminal.com', this.onReconnectWebSocket);
+            webSocket.addSLListener(this);
+            return webSocket;
+        }
     }
 
     onWebSocketEvent(json: JSON) {

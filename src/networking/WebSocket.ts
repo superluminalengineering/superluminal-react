@@ -41,14 +41,15 @@ export class SLWebSocket extends WebSocket {
         this.onmessage = this.onMessage;
     }
 
-    static initialize(url: string, onReconnect: () => Promise<void>) {
-        if (SLWebSocket.instance) { return; }
-        SLWebSocket.initializeWithBufferAndListeners(url, [], [], onReconnect);
+    static initialize(url: string, onReconnect: () => Promise<void>): SLWebSocket {
+        if (SLWebSocket.instance) { return SLWebSocket.instance; }
+        return SLWebSocket.initializeWithBufferAndListeners(url, [], [], onReconnect);
     }
 
-    private static initializeWithBufferAndListeners(url: string, buffer: ArrayBuffer[], listeners: SLWebSocketEventListener[], onReconnect: () => Promise<void>) {
+    private static initializeWithBufferAndListeners(url: string, buffer: ArrayBuffer[], listeners: SLWebSocketEventListener[], onReconnect: () => Promise<void>): SLWebSocket {
         const instance = new SLWebSocket(url, buffer, listeners, onReconnect);
         SLWebSocket.instance = instance;
+        return instance;
     }
 
     addSLListener(listener: SLWebSocketEventListener) {
