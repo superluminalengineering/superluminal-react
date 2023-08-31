@@ -25,6 +25,7 @@ class SessionController implements SLWebSocketEventListener {
 
     private constructor() {
         this.onWebSocketEvent = this.onWebSocketEvent.bind(this);
+        this.onReconnectWebSocket = this.onReconnectWebSocket.bind(this);
     }
 
     static getInstance(): SessionController {
