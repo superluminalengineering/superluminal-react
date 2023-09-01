@@ -100,7 +100,7 @@ class SessionController implements SLWebSocketEventListener {
         }
     }
 
-    onWebSocketEvent(json: JSON) {
+    onWebSocketEvent(json: any) {
         const path = json['path'];
         if (!path) { return; }
         switch (path) {
@@ -112,7 +112,7 @@ class SessionController implements SLWebSocketEventListener {
         }
     }
 
-    onMessageReceived(json: JSON) {
+    onMessageReceived(json: any) {
         const id = json['id'];
         const content = json['content'];
         const sender = json['sender'];
@@ -120,7 +120,7 @@ class SessionController implements SLWebSocketEventListener {
         this.addChatMessage({ id: id, sender: sender, content: content, isEphemeral: false });
     }
 
-    onSessionStateUpdated(json: JSON) {
+    onSessionStateUpdated(json: any) {
         const sessionState = json['session_state'];
         const error = json['error'];
         if (!sessionState) { return; }
@@ -130,7 +130,7 @@ class SessionController implements SLWebSocketEventListener {
         this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(sessionState, error));
     }
 
-    onAssistantStateUpdated(json: JSON) {
+    onAssistantStateUpdated(json: any) {
         const state = json['assistant_reply_state'];
         if (!state) { return; }
         let message: string | null = null;

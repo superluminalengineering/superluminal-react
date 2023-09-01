@@ -10,7 +10,7 @@
         "declarationMap": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
-        "strictNullChecks": true
+        "strict": true
     },
     "include": ["./src", "./types"],
     "exclude": ["node_modules"]

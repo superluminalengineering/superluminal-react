@@ -10,7 +10,7 @@ export enum SLWebSocketState {
 }
 
 export interface SLWebSocketEventListener {
-    onWebSocketEvent?: (json: JSON) => void;
+    onWebSocketEvent?: (json: any) => void;
     onWebSocketStateChanged?: (state: SLWebSocketState) => void;
 }
 
@@ -176,8 +176,8 @@ export class SLWebSocket extends WebSocket {
         });
     }
 
-    private onError(error: ErrorEvent) {
-        console.error(`[Web Socket] Error: ${error.message}.`);
+    private onError(event: Event) {
+        console.error(`[Web Socket] Error: ${event}.`);
     }
 
     private onClose(e: CloseEvent) {
