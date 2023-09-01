@@ -4,6 +4,10 @@ The official front-end React component for the Superluminal API.
 
 For more information visit the [full documentation](https://superluminal.dev/docs).
 
+## Example App
+
+For a full example app, see https://github.com/superluminalengineering/superluminal-react-example.
+
 ## Tutorial
 
 The Superluminal React component is the easiest way to add conversational data interaction similar to ChatGPT + CodeInterpreter to your dashboard. The layout of the component is customizable and should be sufficient to let you style it according to your branding. That said, if you need even deeper customization we recommend you take a look at the [Direct API Usage Tutorial](https://superluminal.dev/docs/#tutorial).
