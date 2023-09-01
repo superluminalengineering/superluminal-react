@@ -7,10 +7,11 @@
         "jsx": "react",
         "typeRoots" : ["./node_modules/@types", "./types"],
         "declaration": true,
+        "declarationMap": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
         "strictNullChecks": true
     },
-    "include": ["./src", "./types" ],
+    "include": ["./src", "./types"],
     "exclude": ["node_modules"]
 }
