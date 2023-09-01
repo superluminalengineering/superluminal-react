@@ -154,7 +154,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
                 ) }
             </div>
         } else if (sessionState == 'initializing' || sessionState == 'waiting_for_data' || sessionState == 'validating_data') {
-            return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            return <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', userSelect: 'none' }}>
                 <img src='https://superluminal.dev/images/ai.webp' width="64px" height="64px" draggable={false} />
                 <div style={{ fontSize: '20px', fontWeight: 600, color: '#000000', marginTop: '8px' }}>Loading</div>
             </div>
