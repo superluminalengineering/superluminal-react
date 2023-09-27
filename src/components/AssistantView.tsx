@@ -1,4 +1,5 @@
-import Plot from 'react-plotly.js';
+import PlotModule from 'react-plotly.js';
+const Plot: typeof PlotModule = ((PlotModule as any).__esModule === true) ? (PlotModule as any).default : PlotModule
 import React from 'react'
 import ReactDOM from 'react-dom';
 
