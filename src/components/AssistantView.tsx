@@ -8,6 +8,7 @@ import ProfilePictureView from './ProfilePictureView';
 import SessionController, { SessionControllerEventListener } from '../controllers/SessionController';
 import TablePreview from '../table/TablePreview';
 
+import { AssistantState } from '../models/AssistantState';
 import { ChatMessage } from '../models/ChatMessage';
 import { SessionState } from '../models/SessionState';
 import { TableInfo } from '../models/TableInfo';
@@ -171,7 +172,7 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
         const { isProcessing, sessionState } = this.state;
         const opacity = (isProcessing || sessionState != 'ready') ? 0.5 : 1;
         const inlineInputStyle = { border: 'solid', borderWidth: '1px', padding: '12px', borderColor: '#0000000D',
-            width: '100%', borderRadius: '6px', background: '#00000005', height: '36px', opacity };
+            width: '100%', borderRadius: '6px', background: '#00000005', height: '36px' };
         return <div ref={this.inputContainerRef} style={styles.inputContainer}>
             <InlineInput ref={this.inputRef} placeholder="Type here..." style={{ ...inlineInputStyle, ...inputStyle }} onEnter={this.sendChatMessage} />
             <div style={{ ...styles.sendButton, ...{ width: '96px', opacity }, ...sendButtonStyle }} onClick={this.sendChatMessage}>Send</div>
@@ -196,6 +197,10 @@ class AssistantView extends React.Component<Props, State> implements SessionCont
 
     onSessionStateUpdated(sessionState: SessionState, error: string | null) {
         this.setState({ sessionState });
+    }
+
+    onAssistantStateUpdated(assistantState: AssistantState) {
+        this.setState({ isProcessing: (assistantState != 'idle') });
     }
 
     onChatMessagesUpdated(chatMessages: ChatMessage[]) {

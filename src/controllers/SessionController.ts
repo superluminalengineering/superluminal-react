@@ -2,6 +2,7 @@ import Server from "../networking/Server";
 
 import UUIDUtilities from "../utilities/UUIDUtilities";
 
+import { AssistantState } from "../models/AssistantState";
 import { ChatMessage } from "../models/ChatMessage";
 import { SessionState } from "../models/SessionState";
 import { SLWebSocket, SLWebSocketEventListener } from "../networking/WebSocket";
@@ -9,6 +10,7 @@ import { TablePage, isTablePage } from "../models/TableInfo";
 
 export interface SessionControllerEventListener {
     onSessionStateUpdated?: (sessionState: SessionState, error: string | null) => void;
+    onAssistantStateUpdated?: (assistantState: AssistantState) => void;
     onChatMessagesUpdated?: (chatMessages: ChatMessage[]) => void;
     onTablePageReceived?: (page: TablePage) => void;
 }
@@ -17,6 +19,7 @@ class SessionController implements SLWebSocketEventListener {
     listeners: SessionControllerEventListener[] = [];
     projectID: string = "main";
     sessionState: SessionState = 'initializing';
+    assistantState: AssistantState = 'idle';
     error: string | null = null;
     authToken: string | null = null;
     chatMessages: ChatMessage[] = [];
@@ -117,12 +120,15 @@ class SessionController implements SLWebSocketEventListener {
         const content = json['content'];
         const sender = json['sender'];
         if (!id || !content || !sender) { return; }
+        if (sender == 'assistant') {
+            this.onAssistantStateUpdated({ assistant_reply_state: 'idle' })
+        }
         this.addChatMessage({ id: id, sender: sender, content: content, isEphemeral: false });
     }
 
     onSessionStateUpdated(json: any) {
-        const sessionState = json['session_state'];
-        const error = json['error'];
+        const sessionState: SessionState = json['session_state'];
+        const error: string | null = json['error'];
         if (!sessionState) { return; }
         this.sessionState = sessionState;
         this.error = error;
@@ -130,11 +136,13 @@ class SessionController implements SLWebSocketEventListener {
         this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(sessionState, error));
     }
 
-    onAssistantStateUpdated(json: any) {
-        const state = json['assistant_reply_state'];
-        if (!state) { return; }
+        const assistantState: AssistantState = json['assistant_reply_state'];
+        if (!assistantState) { return; }
+        this.assistantState = assistantState;
+        this.listeners.forEach((listener) => listener.onAssistantStateUpdated?.(assistantState));
+        // Add a matching ephemeral chat message
         let message: string | null = null;
-        switch (state) {
+        switch (assistantState) {
             case 'idle': break;
             case 'analyzing-data': message = 'Analyzing data...'; break;
             case 'analyzing-task': message = 'Analyzing task...'; break;
