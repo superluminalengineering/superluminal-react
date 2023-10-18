@@ -76,7 +76,9 @@ class SessionController implements SLWebSocketEventListener {
     }
 
     sendChatMessage(message: string) {
-        if (!this.authToken) { return; }
+        if (!this.authToken) { return console.error("Couldn't send chat message due to missing auth token."); }
+        if (this.sessionState != 'ready') { return console.error("Couldn't send chat message due to session state not being ready."); }
+        if (this.assistantState != 'idle') { return console.error("Couldn't send chat message due to assistant state not being idle."); }
         this.getWebSocket().slSend('send-message', this.authToken, { message: message });
         this.addChatMessage({
             id: UUIDUtilities.unsecureUUID(),
@@ -89,11 +91,11 @@ class SessionController implements SLWebSocketEventListener {
     }
 
     getTablePage(tableID: string, offset: number, count: number) {
-        if (!this.authToken) { return; }
+        if (!this.authToken) { return console.error("Couldn't get table page due to missing auth token."); }
         this.getWebSocket().slSend('get-table-page', this.authToken, { table_id: tableID, offset: offset, count: count });
     }
 
-    getWebSocket(): SLWebSocket {
+    private getWebSocket(): SLWebSocket {
         if (SLWebSocket.instance) {
             return SLWebSocket.instance;
         } else {
@@ -115,7 +117,7 @@ class SessionController implements SLWebSocketEventListener {
         }
     }
 
-    onMessageReceived(json: any) {
+    private onMessageReceived(json: any) {
         const id = json['id'];
         const content = json['content'];
         const sender = json['sender'];
@@ -126,7 +128,7 @@ class SessionController implements SLWebSocketEventListener {
         this.addChatMessage({ id: id, sender: sender, content: content, isEphemeral: false });
     }
 
-    onSessionStateUpdated(json: any) {
+    private onSessionStateUpdated(json: any) {
         const sessionState: SessionState = json['session_state'];
         const error: string | null = json['error'];
         if (!sessionState) { return; }
@@ -136,6 +138,7 @@ class SessionController implements SLWebSocketEventListener {
         this.listeners.forEach((listener) => listener.onSessionStateUpdated?.(sessionState, error));
     }
 
+    private onAssistantStateUpdated(json: any) {
         const assistantState: AssistantState = json['assistant_reply_state'];
         if (!assistantState) { return; }
         this.assistantState = assistantState;
@@ -163,19 +166,19 @@ class SessionController implements SLWebSocketEventListener {
         });
     }
 
-    onTablePageReceived(json: any) {
+    private onTablePageReceived(json: any) {
         const page = json.page
         if (!isTablePage(page)) { return }
         this.listeners.forEach((listener) => listener.onTablePageReceived?.(page));
     }
 
-    addChatMessage(message: ChatMessage) {
+    private addChatMessage(message: ChatMessage) {
         this.chatMessages = this.chatMessages.filter((chatMessage) => !chatMessage.isEphemeral);
         this.chatMessages.push(message);
         this.listeners.forEach((listener) => listener.onChatMessagesUpdated?.(this.chatMessages));
     }
 
-    onReconnectWebSocket(): Promise<void> {
+    private onReconnectWebSocket(): Promise<void> {
         return Promise.resolve(); // TODO: Implement
     }
 }

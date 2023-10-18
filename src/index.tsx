@@ -54,4 +54,6 @@ class Superluminal extends React.Component<Props, State> {
     }
 }
 
+export { SessionController };
+
 export default Superluminal;
